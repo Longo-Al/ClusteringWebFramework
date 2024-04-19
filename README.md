@@ -1,172 +1,149 @@
-﻿***Task1
+﻿# Esercitazione 1: Classi, Aggregazione, Interfacce
 
-**Esercitazione 1 –** Classi, Aggregazione, Interfaccie 
+## Task 1: Definizione di Classi e Metodi
 
-Le  visibilità  di  attributi,  metodi  e  classi  devono  essere  di  volta  in  volta  decise  dallo Studente 
+### Classe `Example`
 
-- Definire la classe **Example**(nel package di default) che modella la entità esempio (inteso come vettore di valori reali). 
+Questa classe modella una entità esempio, intesa come vettore di valori reali.
 
-***class** Example {…}* 
+**Attributi**
 
-***Membri Attributi*** 
+- `Double[] example;` // Vettore di valori reali
 
+**Costruttore**
 
+- `Example(int length)`
+  - **Input:** `length` - dimensione dell'esempio.
+  - **Comportamento:** Inizializza `example` come vettore di dimensione `length`.
 
-|Double|` `[] example; // vettore di valori reali|
-| - | - |
-|||
-***Membri Metodi*** 
+**Metodi**
 
-Example (**int** length) 
+- `void set(int index, Double v)`
+  - **Input:**
+    - `index` - Posizione del valore.
+    - `v` - Valore da inserire.
+  - **Comportamento:** Modifica `example` inserendo `v` in posizione `index`.
 
-*Input:  dimensione dell’esempio* 
+- `Double get(int index)`
+  - **Input:** `index` - Posizione di `example`.
+  - **Output:** Valore memorizzato in `example[index]`.
+  - **Comportamento:** Restituisce `example[index]`.
 
-*Output: //* 
+- `double distance(Example newE)`
+  - **Input:** `newE` - Istanza di `Example`.
+  - **Output:** Calcola la distanza euclidea tra `this.example` e `newE.example`.
+  - **Comportamento:** Restituisce il valore calcolato.
 
-*Comportamento:  inizializza example come vettore di dimensione length* 
+- `public String toString()`
+  - **Output:** La stringa che rappresenta il contenuto di `example`.
+  - **Comportamento:** Restituisce la stringa.
 
-**void** set(**int** index, Double v)
+### Classe `Data`
 
-*Input: index: posizione del valore , v: valore* 
+Questa classe aggrega la classe `Example`.
 
-*Comportamento:  modifica example inserendo v in posizione index ;* 
+**Attributi**
 
-Double get(**int** index)
+- `Example[] data;` // Rappresenta il dataset
+- `int numberOfExamples;` // Numero di esempi nel dataset
 
-*Input:  index: posizione di example* 
+**Costruttore**
 
-*Output  : valore memorizzato in example[index] Comportamento:  restituisce example[index];* 
+- `Data()`
+  - **Comportamento:** Avvalora un oggetto `data` predefinito (fornito dal docente).
 
-**double** distance(Example newE)
+**Metodi**
 
-*Input:  newE : istanza di Example* 
+- `int getNumberOfExamples()`
+  - **Output:** Numero di esempi memorizzati in `data`.
+  - **Comportamento:** Restituisce `numberOfExamples`.
 
-*Output:  calcola la distanza euclidea tra this.example e new.example  Comportamento:  restituisce il valore calcolato;* 
+- `Example getExample(int exampleIndex)`
+  - **Input:** `exampleIndex` - Indice di un esempio memorizzato in `data`.
+  - **Output:** L'esempio memorizzato in `data[exampleIndex]`.
+  - **Comportamento:** Restituisce `data[exampleIndex]`.
 
-**public** String toString()
+- `double[][] distance()`
+  - **Output:** Matrice triangolare superiore delle distanze Euclidee calcolate tra gli esempi memorizzati in `data`.
+  - **Comportamento:** Restituisce la matrice triangolare superiore delle distanze.
 
-*Input:  newE : istanza di Example* 
+- `public String toString()`
+  - **Output:** Stringa che modella lo stato dell'oggetto.
+  - **Comportamento:** Crea una stringa in cui memorizza gli esempi memorizzati nell'attributo `data`, opportunamente enumerati. Restituisce tale stringa.
 
-*Output:  la stringa che rappresenta il contenuto di example  Comportamento: restituisce la stringa;* 
+### Utilizzo del Metodo Main
 
-- Definire la classe **Data** che aggrega la classe **Example****  
+Si usi il metodo main in `Data` fornito dal docente per ottenere il seguente output:
+makefile:
 
-***Membri Attributi*** 
+0:[1.0,2.0,0.0] 1:[0.0,1.0,-1.0] 2:[1.0,3.0,5.0] 3:[1.0,3.0,4.0] 4:[2.0,2.0,0.0]
 
-Example data []; // che rappresenta il dataset 
+Distance matrix:
+0.0 3.0 26.0 17.0 1.0
+0.0 0.0 41.0 30.0 6.0
+0.0 0.0 0.0 1.0 27.0
+0.0 0.0 0.0 0.0 18.0
+0.0 0.0 0.0 0.0 0.0
 
-**int** numberOfExamples; // che rappresenta il numero di esempi nel dataset
+### Interfaccia `ClusterDistance` e Classi Correlate
 
-***Membri Metodi*** 
+- `Cluster`: Modella un cluster come la collezione delle posizioni occupate dagli esempi raggruppati nel cluster nel vettore `data` dell'oggetto che modella il dataset su cui il clustering è calcolato (istanza di `Data`).
+- `SingleLinkDistance`: Implementa l'interfaccia `ClusterDistance`.
+- `AverageLinkDistance`: Implementa l'interfaccia `ClusterDistance` e implementa la distanza average-link tra cluster.
 
-Data()  
+### Classe `ClusterSet`
 
-*Comportamento: Avvalora un oggetto data predefinito (fornito dal docente)* 
+Modella un insieme di cluster.
 
-**int** getNumberOfExamples() 
+**Metodo Aggiunto**
 
-*Output:  numero di esempi memorizzati in data Comportamento: restituisce numberOfExamples* 
+- `ClusterSet mergeClosestClusters(ClusterDistance distance, Data data)`
+  - **Input:**
+    - `distance` - Oggetto per il calcolo della distanza tra cluster.
+    - `data` - Oggetto istanza che rappresenta il dataset.
+  - **Output:** Nuova istanza di `ClusterSet`.
+  - **Comportamento:** Determina la coppia di cluster più simili usando `distance` e li fonde in un unico cluster; crea una nuova istanza di `ClusterSet` che contiene tutti i cluster dell'oggetto this a meno dei due cluster fusi.
 
-Example getExample(**int** exampleIndex)
+### Classe `Dendrogram`
 
-*Input: indice di un esempio memorizzato in data* 
+Contiene:
 
-*Output: l’esempio memorizzato in data[exampleIndex] Comportamento: restituisce data[exampleIndex]* 
+**Attributi**
 
-**double** [][] distance()
+- `private ClusterSet[] tree;` // Modella il dendrogramma
 
-*Input: //* 
+**Costruttore**
 
-*Output:  matrice  triangolare  superiore  delle  distanze  Euclidee  calcolate  tra  gli esempi memorizzati in  data. Tale matrice va avvalorata usando il metodo distance di Example* 
+- `Dendrogram(int depth)`
+  - **Input:** `depth` - Profondità del dendrogramma.
+  - **Comportamento:** Crea un vettore di dimensione `depth` con cui inizializza `tree`.
 
-*Comportamento: restituisce la matrice triangolare superiore delle distanze* 
+**Metodi**
 
-**public** String toString()
+- `void setClusterSet(ClusterSet c, int level)`
+  - **Comportamento:** Memorizza `c` nella posizione `level` di `tree`.
 
-*Input: //* 
+- `ClusterSet getClusterSet(int level)`
+  - **Comportamento:** Restituisce `tree[level]`.
 
-*Output: stringa che modella lo stato dell'oggetto* 
+- `int getDepth()`
+  - **Comportamento:** Restituisce la profondità del dendrogramma.
 
-*Comportamento:  crea  una  stringa  in  cui  memorizza  gli  esempi  memorizzati nell’attributo data, opportunamente enumerati. Restituisce tale stringa* 
+- `public String toString()`
+  - **Comportamento:** Restituisce una rappresentazione stringa del dendrogramma.
 
-*Si usi il metodo main in **Data*** fornito dal docente per ottenere il seguente output: 
+- `public String toString(Data data)`
+  - **Comportamento:** Restituisce una rappresentazione stringa del dendrogramma utilizzando i dati del dataset.
 
-0:[1.0,2.0,0.0] 1:[0.0,1.0,-1.0] 2:[1.0,3.0,5.0] 3:[1.0,3.0,4.0] 4:[2.0,2.0,0.0] 
+### Classe `HierarchicalClusterMiner`
 
-Distance matrix: 
+Implementa il metodo per eseguire il clustering gerarchico.
 
-0\.0  3.0  26.0  17.0  1.0 
+**Metodo**
 
-0\.0  0.0  41.0  30.0  6.0 
+- `void mine(Data data, ClusterDistance distance)`
+  - **Comportamento:** Crea il livello base del dendrogramma che rappresenta ogni esempio in un cluster separato; per tutti i livelli successivi del dendrogramma costruisce l'istanza di `ClusterSet` che realizza la fusione dei due cluster più vicini.
 
-0\.0  0.0  0.0  1.0  27.0  
+### Utilizzo della Classe `MainTest`
 
-0\.0  0.0  0.0  0.0  18.0  
-
-0\.0  0.0  0.0  0.0  0.0 
-
-- Considerare la classe ***Cluster*** fornita dal docente che modella un cluster come la collezione delle posizioni occupate dagli esempi raggruppati nel Cluster nel vettore data dell’oggetto che modella il dataset su cui il clustering è calcolato (istanza di Data) 
-- Considerare l’interfaccia ***ClusterDistance*** e la classe ***SingleLinkDistance***  fornite dal docente. Scrivere la classe ***AverageLinkDistance***  che implementa l’interfaccia ***ClusterDistance*** e implementa la distanza average-link tra cluster 
-- Considerare la classe ***ClusterSet*** parzialmente fornita dal docente che modella un insieme di cluster   
-
-  Aggiungere a ClusterSet il metodo: 
-
-  ClusterSet mergeClosestClusters(ClusterDistance distance, Data data) 
-
-*Input: distance: oggetto per il calcolo della distanza tra cluster; data: oggetto istanza che rappresenta il dataset in cui si sta calcolando l’oggetto istanza di ClusterSet* 
-
-*Output: nuova istanza di ClusterSet* 
-
-*Comportamento: determina la coppia di cluster più simili (usando il metodo distance di ClusterDistance e li fonde in unico cluster; crea una nuova istanza di ClusterSet che contiene tutti i cluster dell’oggetto **this** a meno dei due cluster fusi al posto dei quali  inserisce  il  cluster  risultante  dalla  fusione  (nota  bene  l’oggetto  ClusterSet risultante  memorizza  un  numero  di  cluster  che  è  pari  al  numero  di  cluster memorizzato nell’oggetto this meno 1).* 
-
-- Scrivere la classe ***Dendrogram*** che contiene: ***Membri Attributi*** 
-
-  **private** ClusterSet tree[]; // modella il dendrogramma 
-
-  ***Membri Metodi*** 
-
-  Dendrogram(**int** depth) 
-
-  *Input: depth: profondità del dendrogramma* 
-
-  *Comportamento: crea un vettore di dimensione depth con cui inizializza tree.* 
-
-  **void** setClusterSet(ClusterSet c, **int** level) 
-
-  *Comportamento: memorizza c nella posizione level di tree* 
-
-  ClusterSet getClusterSet(**int** level) 
-
-  *Comportamento: restituisce tree[level]* 
-
-  **int** getDepth() 
-
-  *Comportamento: la profondità del dendrogamma (ossia la dimensione di tree) Aggiungere i metodi:* 
-
-  **public** String toString() { 
-
-String v=""; 
-
-**for** (**int** i=0;i<tree.length;i++) 
-
-v+=("level"+i+":\n"+tree[i]+"\n"); **return** v; 
-
-} 
-
-String toString(Data data) { 
-
-String v=""; 
-
-**for** (**int** i=0;i<tree.length;i++) 
-
-v+=("level"+i+":\n"+tree[i].toString(data)+"\n"); **return** v; 
-
-} 
-
-- Completare la classe  ***HierachicalClusterMiner*** parzialmente fornita dal docente implementando il metodo: 
-
-  **void** mine(Data data, ClusterDistance distance) 
-
-  *Comportamento:  crea  il  livello  base  (livello  0)  del  dendrogramma  che contiene  l’istanze  di  ClusterSet  che  rappresenta  ogni  esempio  in  un  cluster separato;  per  tutti  i  livelli  successivi  del  dentrogramma  (level>=1  e  level  <* dendrogram.getDepth()*) costruisce l’istanza di ClusterSet che realizza la fusione dei due cluster più vicini nella istanza del ClusterSet memorizzata al livello level-1 del dendrogramma (usare* mergeClosestClusters *di ClusterSet); memorizza l’istanza di ClusterSet ottenuta per fusione nel livello level del dendrogramma.* 
-
-*Usare il main della classe **MainTest** fornita dal docente per calcolare l’output mostrato nel file output.txt.* 
+Usare la classe `MainTest` fornita dal docente per calcolare l'output mostrato nel file `output.txt`.
