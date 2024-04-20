@@ -2,20 +2,19 @@ public class Dendrogram {
     private ClusterSet tree[];
 
     Dendrogram(int depth){
-        //to do
+        tree = new ClusterSet[depth];
     }
 
     void setClusterSet(ClusterSet c, int level){
-        //to do
+        tree[level] = c;
     }
 
     ClusterSet getClusterSet(int level){
-        //to do
-        return new ClusterSet(0);
+        return tree[level];
     }
 
     int getDepth(){
-        return 1;
+        return tree.length;
     }
 
     public String toString(){

@@ -1,4 +1,6 @@
-
+/*
+ *  Status: completed, not tested;
+ */
 
 public class Data {
 	
@@ -14,12 +16,25 @@ public class Data {
 	}
 
 	double [][] distance(){
-		double[][] distance_matrix = new double[0][0];
+		double[][] distance_matrix = new double[numberOfExamples][numberOfExamples];
+		for(int raw=0; raw < numberOfExamples; raw++){
+			for(int column=0; column < numberOfExamples; column++){
+				if (raw < column)
+					distance_matrix[raw][column] = data[raw].distance(data[column]);
+				else
+					distance_matrix[raw][column] = 0.0;
+			}
+		}
 		return distance_matrix;
 	}
 
 	public String toString(){
-		return "";
+		String str = "Data examples:\n";
+		for(int c=0; c<numberOfExamples; c++){
+			str += "\tExample n."+(c+1)+": ";
+			str += data[c].toString()+";\n";
+		}
+		return str;
 	}
 
 	Data(){
@@ -58,9 +73,6 @@ public class Data {
 						
 		// numberOfExamples		
 		 numberOfExamples=5;		 
-		 
-		
-		
 	}
 	
 	
@@ -76,9 +88,6 @@ public class Data {
 			System.out.println("");
 		}
 		
-		
-	
-	
 	}
 
 }

@@ -1,26 +1,49 @@
+/*
+ * STATUS: Completed, not tested.
+ */
+
 public class Example {
-    Double [] example;
+    private double [] examples;
     
     Example(int lenght){
-        //to do
+        examples = new double[lenght];
     }
 
     void set(int index, Double v){
-        //to do
+        examples[index] = v;
     }
 
     Double get(int index){
-        //to do
-        return 0.0;
+        return examples[index];
     }
 
     double distance(Example newE){
-        //to do
-        return 0.0;
+        double distance = calculateDistance(this.examples, newE.examples);
+        return distance;
     }
 
     public String toString(){
-        //to do
-        return "";
+        String str= "[";
+        for (double d : examples) {
+            str += d;
+            str += ";";
+        }
+        str +="]";
+        return str;
     }
+
+    private double calculateDistance(double[] a, double[] b) {
+            if (a.length != b.length) {
+                throw new IllegalArgumentException("Both vectors must be of the same length");
+            }
+    
+            double sum = 0.0;
+            for (int i = 0; i < a.length; i++) {
+                sum += Math.pow(a[i] - b[i], 2);
+            }
+    
+            return sum;
+        }
+
 }
+
