@@ -1,4 +1,4 @@
-import ClusterPackage.Data.*;
+import ClusterPackage.DataSet.*;
 import ClusterPackage.Distances.*;
 import ClusterPackage.Implementation.HierachicalClusterMiner;
 public class MainTest {

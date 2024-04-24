@@ -1,5 +1,6 @@
 package ClusterPackage.Implementation;
-import ClusterPackage.Data.*;
+
+import ClusterPackage.DataSet.*;
 
 class Dendrogram {
     private ClusterSet tree[];

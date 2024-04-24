@@ -1,7 +1,7 @@
 package ClusterPackage.Implementation;
-/*
- *  STATUS: completed, not tested
- */
+
+import ClusterPackage.DataSet.*;
+import ClusterPackage.Distances.*;
 
 import ClusterPackage.Data.*;
 import ClusterPackage.Distances.*;

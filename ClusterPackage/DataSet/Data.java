@@ -1,13 +1,4 @@
-<<<<<<<< HEAD:ClusterPackage/Data/Data.java
-package ClusterPackage.Data;
-/*
- *  Status: completed, not tested;
- */
-========
 package ClusterPackage.DataSet;
->>>>>>>> 43b644c (Organizzata la struttura in package.):ClusterPackage/DataSet/Data.java
-
-import ClusterPackage.Data.Example;
 
 public class Data {
 	

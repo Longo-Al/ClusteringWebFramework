@@ -1,5 +1,6 @@
 package ClusterPackage.Distances;
-import ClusterPackage.Data.Data;
+
+import ClusterPackage.DataSet.Data;
 import ClusterPackage.Implementation.Cluster;
 
 public interface ClusterDistance {

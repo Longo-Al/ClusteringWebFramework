@@ -1,5 +1,6 @@
 package ClusterPackage.Implementation;
-import ClusterPackage.Data.*;
+
+import ClusterPackage.DataSet.*;
 
 public class Cluster {	
 	private Integer clusteredData[]=new Integer[0];

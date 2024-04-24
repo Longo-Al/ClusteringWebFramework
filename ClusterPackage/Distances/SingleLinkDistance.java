@@ -1,5 +1,6 @@
 package ClusterPackage.Distances;
-import ClusterPackage.Data.*;
+
+import ClusterPackage.DataSet.*;
 import ClusterPackage.Implementation.Cluster;
 
 public class SingleLinkDistance implements ClusterDistance {

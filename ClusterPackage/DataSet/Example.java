@@ -1,11 +1,4 @@
-<<<<<<<< HEAD:ClusterPackage/Data/Example.java
-package ClusterPackage.Data;
-/*
- * STATUS: Completed, not tested.
- */
-========
 package ClusterPackage.DataSet;
->>>>>>>> 43b644c (Organizzata la struttura in package.):ClusterPackage/DataSet/Example.java
 
 public class Example {
     private double [] examples;
