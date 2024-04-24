@@ -3,9 +3,6 @@ package ClusterPackage.Implementation;
 import ClusterPackage.DataSet.*;
 import ClusterPackage.Distances.*;
 
-import ClusterPackage.Data.*;
-import ClusterPackage.Distances.*;
-
 class ClusterSet {
 
 	private Cluster C[];
