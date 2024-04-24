@@ -1,6 +1,8 @@
+package ClusterPackage.Implementation;
+import ClusterPackage.Data.*;
+import ClusterPackage.Distances.ClusterDistance;
 
-
-class HierachicalClusterMiner {
+public class HierachicalClusterMiner {
 	
 	private Dendrogram dendrogram;
 
@@ -14,13 +16,13 @@ class HierachicalClusterMiner {
 		return dendrogram.toString();
 	}
 	
-	String toString(Data data) {
+	public String toString(Data data) {
 		return dendrogram.toString(data);
 	}
 	
-	void mine(Data data, ClusterDistance distance){
+	public void mine(Data data, ClusterDistance distance){
 		ClusterSet level = new ClusterSet(data.getNumberOfExamples());
-		for (int i = 0; i < data.numberOfExamples; i++) {
+		for (int i = 0; i < data.getNumberOfExamples(); i++) {
 			Cluster c = new Cluster();
 			c.addData(i);
 			level.add(c);

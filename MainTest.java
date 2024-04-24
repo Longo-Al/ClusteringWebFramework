@@ -1,4 +1,6 @@
-
+import ClusterPackage.Data.*;
+import ClusterPackage.Distances.*;
+import ClusterPackage.Implementation.HierachicalClusterMiner;
 public class MainTest {
 	public static void main(String[] args) {
 		Data data =new Data();

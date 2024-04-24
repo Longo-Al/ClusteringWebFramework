@@ -1,3 +1,4 @@
+package ClusterPackage.Data;
 /*
  * STATUS: Completed, not tested.
  */
@@ -5,19 +6,19 @@
 public class Example {
     private double [] examples;
     
-    Example(int lenght){
+    public Example(int lenght){
         examples = new double[lenght];
     }
 
-    void set(int index, Double v){
+    public void set(int index, Double v){
         examples[index] = v;
     }
 
-    Double get(int index){
+    public Double get(int index){
         return examples[index];
     }
 
-    double distance(Example newE){
+    public double distance(Example newE){
         double distance = calculateDistance(this.examples, newE.examples);
         return distance;
     }

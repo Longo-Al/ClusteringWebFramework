@@ -1,17 +1,21 @@
+package ClusterPackage.Implementation;
 /*
  *  STATUS: completed, not tested
  */
+
+import ClusterPackage.Data.*;
+import ClusterPackage.Distances.*;
 
 class ClusterSet {
 
 	private Cluster C[];
 	private int lastClusterIndex=0;
 	
-	ClusterSet(int k){
+	protected ClusterSet(int k){
 		C=new Cluster[k];
 	}
 	
-	void add(Cluster c){
+	protected void add(Cluster c){
 		for(int j=0;j<lastClusterIndex;j++)
 			if(c==C[j]) // to avoid duplicates
 				return;
@@ -19,11 +23,11 @@ class ClusterSet {
 		lastClusterIndex++;
 	}
 	
-	Cluster get(int i){
+	protected Cluster get(int i){
 		return C[i];
 	}
 	
-	ClusterSet mergeClosestClusterSet(ClusterDistance distance, Data data){
+	protected ClusterSet mergeClosestClusterSet(ClusterDistance distance, Data data){
 		ClusterSet newLevel = new ClusterSet(this.lastClusterIndex - 1);
 		
 		//trovo la minima distanza tra i cluster.

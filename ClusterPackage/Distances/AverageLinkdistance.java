@@ -1,3 +1,6 @@
+package ClusterPackage.Distances;
+import ClusterPackage.Data.*;
+import ClusterPackage.Implementation.Cluster;
 public class AverageLinkdistance implements ClusterDistance{
     public double distance(Cluster c1, Cluster c2, Data d) {
         double totalDistance = 0;

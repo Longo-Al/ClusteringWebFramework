@@ -1,21 +1,24 @@
+package ClusterPackage.Data;
 /*
  *  Status: completed, not tested;
  */
 
+import ClusterPackage.Data.Example;
+
 public class Data {
 	
-	Example data[];
-	int numberOfExamples;
+	private Example data[];
+	private int numberOfExamples;
 	
-	int getNumberOfExamples(){
+	public int getNumberOfExamples(){
 		return this.numberOfExamples;
 	}
 
-	Example getExample(int exampleIndex){
+	public Example getExample(int exampleIndex){
 		return data[exampleIndex];
 	}
 
-	double [][] distance(){
+	public double [][] distance(){
 		double[][] distance_matrix = new double[numberOfExamples][numberOfExamples];
 		for(int raw=0; raw < numberOfExamples; raw++){
 			for(int column=0; column < numberOfExamples; column++){
@@ -37,7 +40,7 @@ public class Data {
 		return str;
 	}
 
-	Data(){
+	public Data(){
 		//data
 		data = new Example [5];
 		Example e=new Example(3);

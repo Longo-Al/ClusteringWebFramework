@@ -1,19 +1,22 @@
-public class Dendrogram {
+package ClusterPackage.Implementation;
+import ClusterPackage.Data.*;
+
+class Dendrogram {
     private ClusterSet tree[];
 
-    Dendrogram(int depth){
+    protected Dendrogram(int depth){
         tree = new ClusterSet[depth];
     }
 
-    void setClusterSet(ClusterSet c, int level){
+    protected void setClusterSet(ClusterSet c, int level){
         tree[level] = c;
     }
 
-    ClusterSet getClusterSet(int level){
+    protected ClusterSet getClusterSet(int level){
         return tree[level];
     }
 
-    int getDepth(){
+    protected int getDepth(){
         return tree.length;
     }
 
