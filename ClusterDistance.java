@@ -1,4 +1,4 @@
 
 public interface ClusterDistance {
-		double distance(Cluster c1, Cluster c2, Data d);
+		abstract double distance(Cluster c1, Cluster c2, Data d);
 }

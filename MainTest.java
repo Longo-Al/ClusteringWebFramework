@@ -1,17 +1,6 @@
 
 public class MainTest {
-	/*
-	public ClusterDistance averagLinkDistance(){
-			
-	}
-	*/
-
-	/**
-	 * @param args
-	 */
 	public static void main(String[] args) {
-		
-		
 		Data data =new Data();
 		System.out.println(data);
 		int k=5;
@@ -33,7 +22,7 @@ public class MainTest {
 		
 		
 		System.out.println("Average link distance");
-		//distance=new AverageLinkdistance();
+		distance=new AverageLinkdistance();
 		clustering.mine(data,distance);
 		System.out.println(clustering);
 		System.out.println(clustering.toString(data));

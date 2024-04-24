@@ -8,7 +8,8 @@ public class SingleLinkDistance implements ClusterDistance {
 		{
 			Example e1=d.getExample(c1.getElement(i));
 			for(int j=0; j<c2.getSize();j++) {
-				double distance=e1.distance(d.getExample(c2.getElement(j)));
+				int targetE = c2.getElement(j);
+				double distance=e1.distance(d.getExample(targetE));
 				if (distance<min)				
 					min=distance;
 			}
