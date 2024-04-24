@@ -1,6 +1,4 @@
 public class AverageLinkdistance implements ClusterDistance{
-
-    @Override
     public double distance(Cluster c1, Cluster c2, Data d) {
         double totalDistance = 0;
         int   count = 0;
@@ -15,6 +13,7 @@ public class AverageLinkdistance implements ClusterDistance{
                 count += 1;   
             }
         }
+        
         return totalDistance / count;
     }
 }

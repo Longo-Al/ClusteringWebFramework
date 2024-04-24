@@ -25,7 +25,6 @@ public class MainTest {
 		distance=new AverageLinkdistance();
 		clustering.mine(data,distance);
 		System.out.println(clustering);
-		System.out.println(clustering.toString(data));
-		
+		System.out.println(clustering.toString(data));	
 	}
 }
