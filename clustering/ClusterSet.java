@@ -1,7 +1,7 @@
-package ClusterPackage.Implementation;
+package clustering;
 
-import ClusterPackage.DataSet.*;
-import ClusterPackage.Distances.*;
+import data.*;
+import distance.*;
 
 class ClusterSet {
 

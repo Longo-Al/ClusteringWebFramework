@@ -1,7 +1,7 @@
-package ClusterPackage.Implementation;
+package clustering;
 
-import ClusterPackage.DataSet.*;
-import ClusterPackage.Distances.ClusterDistance;
+import data.*;
+import distance.ClusterDistance;
 
 public class HierachicalClusterMiner {
 	

@@ -1,4 +1,4 @@
-package ClusterPackage.DataSet;
+package data;
 
 public class Example {
     private double [] examples;
