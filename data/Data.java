@@ -72,8 +72,6 @@ public class Data {
 		// numberOfExamples		
 		 numberOfExamples=5;		 
 	}
-	
-	
 
 	public static void main(String args[]){
 		Data trainingSet=new Data();
@@ -87,5 +85,4 @@ public class Data {
 		}
 		
 	}
-
 }

@@ -4,10 +4,3 @@ public class InvalidDepthException extends IllegalArgumentException {
         super(message);
     }
 }
-
-// Eccezione per gestire i casi in cui si tenta di calcolare la distanza tra due esempi di dimensioni diverse
-public class InvalidSizeException extends IllegalArgumentException {
-    public InvalidSizeException(String message) {
-        super(message);
-    }
-}
