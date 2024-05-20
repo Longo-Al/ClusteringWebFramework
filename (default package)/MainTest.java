@@ -2,6 +2,7 @@ import java.util.Scanner;
 import data.*;
 import distance.*;
 import clustering.HierachicalClusterMiner;
+import exceptions.NegativeNumberException;
 
 public class MainTest {
     public static void main(String[] args) {
@@ -10,6 +11,10 @@ public class MainTest {
         // Acquisizione della profondità del dendrogramma
         System.out.print("Enter the depth of the dendrogram: ");
         int k = scanner.nextInt();
+        
+        if (k < 0) {
+            throw new NegativeNumberException("The depth of the dendrogram cannot be negative: " + k);
+        }
         
         // Creazione dell'oggetto Data
         Data data = new Data();
