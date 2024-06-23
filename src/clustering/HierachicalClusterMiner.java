@@ -1,8 +1,8 @@
 package clustering;
 
-import data.*;
+import data.Data;
+import default package.exceptions.NegativeNumberException;
 import distance.ClusterDistance;
-import exceptions.NegativeNumberException;
 
 public class HierachicalClusterMiner {
     
