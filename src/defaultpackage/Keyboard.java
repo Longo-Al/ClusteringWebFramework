@@ -6,8 +6,11 @@
 //********************************************************************
 
 
-import java.io.*;
-import java.util.*;
+package defaultpackage;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.StringTokenizer;
 
 public class Keyboard {
 	// ************* Error Handling Section **************************

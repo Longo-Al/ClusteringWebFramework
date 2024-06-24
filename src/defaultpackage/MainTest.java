@@ -1,9 +1,16 @@
-import java.util.Scanner;
-import data.*;
-import distance.*;
-import clustering.HierachicalClusterMiner;
-import exceptions.NegativeNumberException;
+package defaultpackage;
 
+import java.util.Scanner;
+
+import clustering.HierachicalClusterMiner;
+import data.Data;
+import distance.AverageLinkdistance;
+import distance.ClusterDistance;
+import distance.SingleLinkDistance;
+
+/**
+ * Classe principale per eseguire i test delle funzionalità.
+ */
 public class MainTest {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
@@ -11,10 +18,6 @@ public class MainTest {
         // Acquisizione della profondità del dendrogramma
         System.out.print("Enter the depth of the dendrogram: ");
         int k = scanner.nextInt();
-        
-        if (k < 0) {
-            throw new NegativeNumberException("The depth of the dendrogram cannot be negative: " + k);
-        }
         
         // Creazione dell'oggetto Data
         Data data = new Data();

@@ -1,18 +1,27 @@
 package data;
 
-import exceptions.NegativeNumberException;
+import defaultpackage.exceptions.NegativeNumberException;
 
+/**
+ * Classe che rappresenta un esempio di dati.
+ */
 public class Example {
-    private double [] examples;
+    private double[] examples;
 
+    /**
+     * Costruttore della classe Example.
+     * 
+     * @param length lunghezza dell'esempio
+     * @throws NegativeNumberException se la lunghezza è minore o uguale a zero
+     */
     public Example(int length) {
+        if (length <= 0) {
+            throw new NegativeNumberException("Length must be greater than 0");
+        }
         examples = new double[length];
     }
 
     public void set(int index, Double v) {
-        if (v < 0) {
-            throw new NegativeNumberException("Example values cannot be negative: " + v);
-        }
         examples[index] = v;
     }
 
@@ -25,6 +34,7 @@ public class Example {
         return distance;
     }
 
+    @Override
     public String toString() {
         String str = "[";
         for (double d : examples) {
@@ -39,12 +49,10 @@ public class Example {
         if (a.length != b.length) {
             throw new IllegalArgumentException("Both vectors must be of the same length");
         }
-
         double sum = 0.0;
         for (int i = 0; i < a.length; i++) {
             sum += Math.pow(a[i] - b[i], 2);
         }
-
         return sum;
     }
 }
