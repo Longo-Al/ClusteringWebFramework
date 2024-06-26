@@ -6,7 +6,7 @@
 //********************************************************************
 
 
-package defaultpackage;
+package ioControl;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

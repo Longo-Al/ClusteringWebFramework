@@ -1,4 +1,4 @@
-package defaultpackage.exceptions;
+package clustering.Exceptions;
 /**
  * Eccezione lanciata quando viene fornito un numero negativo non valido.
  */

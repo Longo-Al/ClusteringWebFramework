@@ -1,7 +1,7 @@
 package clustering;
 
+import clustering.Exceptions.NegativeNumberException;
 import data.Data;
-import defaultpackage.exceptions.NegativeNumberException;
 import distance.ClusterDistance;
 
 /**

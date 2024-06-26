@@ -1,45 +1,68 @@
 package data;
 
-import defaultpackage.exceptions.NegativeNumberException;
+import java.util.Iterator;
+import java.util.List;
+import java.util.LinkedList;
+
+import clustering.Exceptions.NegativeNumberException;
 
 /**
  * Classe che rappresenta un esempio di dati.
  */
-public class Example {
-    private double[] examples;
-
+public class Example implements Iterable{
+    private List<Double> example;
     /**
      * Costruttore della classe Example.
      * 
      * @param length lunghezza dell'esempio
      * @throws NegativeNumberException se la lunghezza è minore o uguale a zero
      */
-    public Example(int length) {
-        if (length <= 0) {
-            throw new NegativeNumberException("Length must be greater than 0");
-        }
-        examples = new double[length];
+    public Example() {
+        this.example = new LinkedList<Double>();
     }
 
-    public void set(int index, Double v) {
-        examples[index] = v;
+    public Example(List<Double> point) {
+        this.example = point;
     }
 
-    public Double get(int index) {
-        return examples[index];
+    // si noti che il metodo “set” è stato rimpiazzato dal metodo “add”
+    void add(Double v) {
+        example.add(v);
     }
 
+    Double get(int index) {
+        return example.get(index);
+    }
+    
+
+    int size(){
+        return this.example.size();
+    }
     public double distance(Example newE) {
-        double distance = calculateDistance(this.examples, newE.examples);
+        double distance = calculateDistance(this.example, newE.example);
         return distance;
+    }
+
+    private double calculateDistance(List<Double> a, List<Double> b) {
+        if (a.size() != b.size()) {
+            throw new IllegalArgumentException("Both vectors must be of the same length");
+        }
+        double sum = 0.0;
+        for (int i = 0; i < a.size(); i++) {
+            sum += Math.pow(a.get(i) - b.get(i), 2);
+        }
+        return sum;
     }
 
     @Override
     public String toString() {
         String str = "[";
-        for (double d : examples) {
+        int i = 1;
+        for (double d : example) {
             str += d;
-            str += ";";
+            if(i < this.example.size())
+                str += ";";
+            i++;    
         }
         str += "]";
         return str;
@@ -55,4 +78,10 @@ public class Example {
         }
         return sum;
     }
+
+    @Override
+    public Iterator<Double> iterator() {
+        return example.iterator();
+    }
+    
 }

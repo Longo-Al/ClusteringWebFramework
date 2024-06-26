@@ -1,4 +1,4 @@
-package defaultpackage.exceptions;
+package clustering.Exceptions;
 /**
  * Eccezione lanciata quando la dimensione è invalida.
  */
