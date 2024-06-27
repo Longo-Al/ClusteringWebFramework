@@ -50,7 +50,7 @@ public class Dendrogram {
     public String toString() {
         StringBuilder v = new StringBuilder();
         for (int i = 0; i < tree.length; i++) {
-            v.append("level").append(i).append(":\n").append(tree[i]).append("\n");
+            v.append("level").append(i+1).append(":\n").append(tree[i]).append("\n");
         }
         return v.toString();
     }
@@ -58,7 +58,7 @@ public class Dendrogram {
     public String toString(Data data) {
         StringBuilder v = new StringBuilder();
         for (int i = 0; i < tree.length; i++) {
-            v.append("level").append(i).append(":\n").append(tree[i].toString(data)).append("\n");
+            v.append("level").append(i+1).append(":\n").append(tree[i].toString(data)).append("\n");
         }
         return v.toString();
     }

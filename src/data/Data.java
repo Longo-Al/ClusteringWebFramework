@@ -28,7 +28,7 @@ public class Data {
     }
 
     public int getNumberOfExamples() {
-        return this.data.size();
+        return data.size();
     }
 
     public Example getExample(int exampleIndex) {

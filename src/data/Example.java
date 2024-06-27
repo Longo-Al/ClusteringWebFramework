@@ -9,7 +9,7 @@ import clustering.Exceptions.NegativeNumberException;
 /**
  * Classe che rappresenta un esempio di dati.
  */
-public class Example implements Iterable{
+public class Example implements Iterable<Double>{
     private List<Double> example;
     /**
      * Costruttore della classe Example.
@@ -66,17 +66,6 @@ public class Example implements Iterable{
         }
         str += "]";
         return str;
-    }
-
-    private double calculateDistance(double[] a, double[] b) {
-        if (a.length != b.length) {
-            throw new IllegalArgumentException("Both vectors must be of the same length");
-        }
-        double sum = 0.0;
-        for (int i = 0; i < a.length; i++) {
-            sum += Math.pow(a[i] - b[i], 2);
-        }
-        return sum;
     }
 
     @Override

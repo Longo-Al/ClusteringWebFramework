@@ -1,29 +1,26 @@
 package clustering;
 
 import data.Data;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.Iterator;
 
 /**
  * Classe che rappresenta un cluster di dati.
  */
-public class Cluster {
-    private Integer[] clusteredData = new Integer[0];
+public class Cluster implements Iterable<Integer>, Cloneable{
+    private Set<Integer> clusteredData;
 
+    public Cluster(){
+        this.clusteredData = new TreeSet<>();
+    }
     /**
      * Aggiunge un nuovo dato al cluster.
      * 
      * @param id identificatore del dato
      */
     public void addData(int id) {
-        // controllo duplicati
-        for (int i = 0; i < clusteredData.length; i++) {
-            if (id == clusteredData[i]) {
-                return;
-            }
-        }
-        Integer[] clusteredDataTemp = new Integer[clusteredData.length + 1];
-        System.arraycopy(clusteredData, 0, clusteredDataTemp, 0, clusteredData.length);
-        clusteredData = clusteredDataTemp;
-        clusteredData[clusteredData.length - 1] = id;
+        clusteredData.add(id);
     }
 
     /**
@@ -32,30 +29,7 @@ public class Cluster {
      * @return numero di elementi nel cluster
      */
     public int getSize() {
-        return clusteredData.length;
-    }
-
-    /**
-     * Restituisce l'elemento all'indice specificato.
-     * 
-     * @param i indice dell'elemento
-     * @return elemento all'indice specificato
-     */
-    public int getElement(int i) {
-        return clusteredData[i];
-    }
-
-    /**
-     * Crea una copia del cluster corrente.
-     * 
-     * @return copia del cluster
-     */
-    public Cluster createACopy() {
-        Cluster copyC = new Cluster();
-        for (int i = 0; i < getSize(); i++) {
-            copyC.addData(clusteredData[i]);
-        }
-        return copyC;
+        return clusteredData.size();
     }
 
     /**
@@ -66,30 +40,46 @@ public class Cluster {
      */
     public Cluster mergeCluster(Cluster c) {
         Cluster newC = new Cluster();
-        for (int i = 0; i < getSize(); i++) {
-            newC.addData(clusteredData[i]);
-        }
-        for (int i = 0; i < c.getSize(); i++) {
-            newC.addData(c.clusteredData[i]);
-        }
+        newC.clusteredData.addAll(this.clusteredData);
+        newC.clusteredData.addAll(c.clusteredData);
         return newC;
     }
 
     @Override
     public String toString() {
         StringBuilder str = new StringBuilder();
-        for (int i = 0; i < clusteredData.length - 1; i++) {
-            str.append(clusteredData[i]).append(",");
+        Iterator<Integer> iterator = clusteredData.iterator();
+        while (iterator.hasNext()) {
+            str.append(iterator.next());
+            if (iterator.hasNext()) {
+                str.append(",");
+            }
         }
-        str.append(clusteredData[clusteredData.length - 1]);
         return str.toString();
     }
 
     public String toString(Data data) {
         StringBuilder str = new StringBuilder();
-        for (Integer integer : clusteredData) {
-            str.append("<").append(data.getExample(integer)).append(">");
+        for (Integer i : clusteredData) {
+            str.append("<").append(data.getExample(i)).append(">");
         }
         return str.toString();
     }
+
+    @Override
+    public Iterator<Integer> iterator() {
+        return clusteredData.iterator();
+    }
+
+    @Override
+    public Cluster clone() {
+        try {
+            Cluster clone = (Cluster) super.clone();
+            clone.clusteredData = new TreeSet<>(this.clusteredData);
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException("Clone non supportato", e);
+        }
+    }
+
 }
