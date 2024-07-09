@@ -1,19 +1,5 @@
-# Stage 1: Build the Java application with Gradle
-FROM gradle:7.2-jdk11 AS build
-# Copy the Gradle wrapper and build files
-COPY gradlew .
-COPY gradlew.bat .
-COPY gradle/ gradle/
-COPY build.gradle .
 
-# Ensure the Gradle wrapper is executable
-RUN chmod +x gradlew
-
-# Copy the source code and compile the application
-COPY src/ src/
-RUN ./gradlew build
-
-# Stage 2: Setup Tomcat and deploy the application
+# Stage 1: Setup Tomcat and deploy the application
 FROM tomcat:9.0
 
 # Set working directories for each service
@@ -32,11 +18,14 @@ RUN apt-get update && apt-get install -y \
 ##private  String PASSWORD = "map";
 
 # Configure SSH
-RUN mkdir /var/run/sshd
-RUN echo 'root:password' | chpasswd
-RUN sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
-RUN sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
-RUN sed -i 's/UsePAM yes/UsePAM no/' /etc/ssh/sshd_config
+RUN mkdir /var/run/sshd \
+    && echo 'root:password' | chpasswd \
+    && sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config \
+    && sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config \
+    && sed -i 's/UsePAM yes/UsePAM no/' /etc/ssh/sshd_config \
+    && useradd --create-home --base-dir /home newuser \
+    && echo "newuser:newuser" | chpasswd 
+
 
 # Expose ports for MySQL, SSH, and Tomcat
 EXPOSE 3306 22 8080
@@ -47,7 +36,7 @@ COPY init.sql /docker-entrypoint-initdb.d/
 
 # Set working directory for Tomcat and deploy the application
 WORKDIR /usr/local/tomcat
-COPY --from=build /app/build/libs/clusteringwebapp.war $CATALINA_HOME/webapps/clusteringwebapp.war
+COPY ./build/libs/clusteringwebapp-*.war $CATALINA_HOME/webapps/clusteringwebapp.war
 
 # Supervisor configuration
 WORKDIR /etc/supervisor/conf.d

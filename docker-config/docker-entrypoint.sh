@@ -1,5 +1,6 @@
 #!/bin/bash
-set -e
+
+cat /etc/passwd
 
 service mysql start
 service ssh start
