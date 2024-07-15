@@ -1,0 +1,39 @@
+services:
+  gradle:
+    image: gradle:latest
+    volumes:
+      - .:/home/gradle/
+    networks:
+      - app-network
+    command: gradle build
+
+  tomcat:
+    image: tomcat:9.0
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./build/libs/clusteringWebApp-1.0-SNAPSHOT.war:/usr/local/tomcat/webapps/clusteringwebapp.war
+    networks:
+      - app-network
+    depends_on:
+      - gradle
+
+  mysql:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: MapDB
+      MYSQL_USER: MapUser
+      MYSQL_PASSWORD: map
+    ports:
+      - "3306:3306"
+    volumes:
+      - .docker-config/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - app-network
+    depends_on:
+      - gradle
+
+networks:
+  app-network:
+    driver: bridge
