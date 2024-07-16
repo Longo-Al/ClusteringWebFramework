@@ -7,7 +7,7 @@ plugins {
     id 'application'
 }
 
-group = 'Map.source'
+group = 'Map'
 version = '1.0-SNAPSHOT'
 
 sourceCompatibility = '11'
@@ -93,7 +93,7 @@ test {
 // Generate the executable Jar (to be included in the Docker container)
 task fatJar(type: Jar) {
     manifest {
-        attributes 'Main-Class': 'Map.source.App'
+        attributes 'Main-Class': 'Map.Server.Main'
     }
     archiveBaseName = project.name + '-all'
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
@@ -105,4 +105,4 @@ project.tasks.getByName('build').dependsOn fatJar
 * MAIN CLASS DECLARATION
 ************************/
 
-mainClassName = 'Map.source.App'
+mainClassName = 'Map.Client.MainTest'

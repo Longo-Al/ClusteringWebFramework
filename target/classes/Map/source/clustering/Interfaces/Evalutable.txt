@@ -1,5 +1,0 @@
-package clustering.Interfaces;
-
-public abstract class Evalutable{
-    
-}
