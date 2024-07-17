@@ -7,12 +7,11 @@ import java.net.Socket;
 /**
  * Classe che gestisce il server
  */
-public class MultiServer {
+public class MultiServer{
     /** La porta del server */
     private final int PORT;
     /** Singleton */
     private static MultiServer singleton = null;
-
     /**
      * Costruttore di classe, inizializza la porta e invoca run()
      *

@@ -17,7 +17,7 @@ repositories {
 }
 
 dependencies {
-    providedCompile 'javax.servlet:javax.servlet-api:4.0.1'
+    implementation 'javax.servlet:javax.servlet-api:4.0.1'
     implementation files('libs/mysql-connector-java-8.0.17.jar')
     implementation files('libs/gson-2.10.1.jar')
     testImplementation platform('org.junit:junit-bom:5.9.2')
@@ -70,6 +70,10 @@ run {
     standardInput = System.in
 }
 
+war {
+    archiveFileName = 'clusteringwebapp.war'
+}
+
 tasks.withType(com.github.spotbugs.snom.SpotBugsTask) {
     reports {
         xml.enabled = true
@@ -93,7 +97,7 @@ test {
 // Generate the executable Jar (to be included in the Docker container)
 task fatJar(type: Jar) {
     manifest {
-        attributes 'Main-Class': 'Map.Server.Main'
+        attributes 'Main-Class': 'Map.servlet.HelloWorldServlet'
     }
     archiveBaseName = project.name + '-all'
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }

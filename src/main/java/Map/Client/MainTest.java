@@ -1,4 +1,4 @@
-package Server;
+package Map.Client;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -6,7 +6,7 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 
-import Server.src.Keyboard;
+import Map.Client.src.Keyboard;
 
 /** MainTest è la classe che si occupa di gestire la comunicazione con il server.
  *  In particolare, si occupa di inviare le richieste al server e di ricevere le risposte.
@@ -128,7 +128,7 @@ public class MainTest {
             main = new MainTest(ip, port);
 
             main.loadDataOnServer();
-            int scelta = 1;
+            int scelta = main.menu();
             if (scelta == 1)
                 main.loadDedrogramFromFileOnServer();
             else

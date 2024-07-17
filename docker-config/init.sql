@@ -1,8 +1,16 @@
-CREATE DATABASE MapDB;
 USE MapDB;
 
-CREATE TABLE yourtable (
+CREATE TABLE examples(
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    value VARCHAR(255) NOT NULL
+    v1 FLOAT,
+    v2 FLOAT,
+    v3 FLOAT
 );
+
+INSERT INTO examples (v1, v2, v3)
+VALUES 
+(1.0, 2.0, 0.0),
+(0.0, 1.0,-1.0),
+(1.0, 3.0, 5.0),
+(1.0, 3.0, 4.0),
+(2.0, 2.0, 0.0);

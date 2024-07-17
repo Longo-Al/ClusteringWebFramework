@@ -15,7 +15,7 @@ public class DbAccess {
     /** Nome del DBMS da utilizzare */
     private final String DBMS = "jdbc:mysql";
     /** Indirizzo del server da utilizzare */
-    private final String SERVER = "localhost";
+    private final String SERVER = "0.0.0.0";
     /** Nome del database da utilizzare */
     private final String DATABASE = "MapDB";
     /** Porta del server da utilizzare */
