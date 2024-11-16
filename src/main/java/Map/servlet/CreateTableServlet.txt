@@ -1,0 +1,92 @@
+package Map.servlet;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.Statement;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+
+public class CreateTableServlet extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        request.getRequestDispatcher("/META-INF/tables.html").forward(request, response);
+    }
+
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        response.setContentType("application/json");
+        PrintWriter out = response.getWriter();
+
+        Gson gson = new Gson();
+        JsonObject jsonRequest = gson.fromJson(request.getReader(), JsonObject.class);
+        
+        String tableName = jsonRequest.get("tableName").getAsString();
+        String columnsJson = jsonRequest.get("columns").toString();
+
+        if (!validateInput(tableName, columnsJson)) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            out.print("{\"message\":\"Input non valido\"}");
+            return;
+        }
+
+        String createTableQuery = buildCreateTableQuery(tableName, columnsJson);
+
+        try (Connection conn = getConnection();
+             Statement stmt = conn.createStatement()) {
+            stmt.executeUpdate(createTableQuery);
+            out.print("{\"message\":\"Tabella creata con successo\"}");
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            out.print("{\"message\":\"Errore nella creazione della tabella\"}");
+            e.printStackTrace();
+        }
+    }
+
+    private boolean validateInput(String tableName, String columnsJson) {
+        if (!tableName.matches("^[a-zA-Z_][a-zA-Z0-9_]*$")) {
+            return false;
+        }
+
+        JsonObject[] columns = new Gson().fromJson(columnsJson, JsonObject[].class);
+        for (JsonObject column : columns) {
+            String columnName = column.get("name").getAsString();
+            String columnType = column.get("type").getAsString();
+            if (!columnName.matches("^[a-zA-Z_][a-zA-Z0-9_]*$") || !columnType.matches("^[a-zA-Z]+$")) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private String buildCreateTableQuery(String tableName, String columnsJson) {
+        JsonObject[] columns = new Gson().fromJson(columnsJson, JsonObject[].class);
+        StringBuilder query = new StringBuilder("CREATE TABLE " + tableName + " (");
+        for (int i = 0; i < columns.length; i++) {
+            JsonObject column = columns[i];
+            String columnName = column.get("name").getAsString();
+            String columnType = column.get("type").getAsString();
+            query.append(columnName).append(" ").append(columnType);
+            if (i < columns.length - 1) {
+                query.append(", ");
+            }
+        }
+        query.append(")");
+        return query.toString();
+    }
+
+    private Connection getConnection() throws Exception {
+        String url = "jdbc:mysql://localhost:3306/your_database";
+        String username = "root";
+        String password = "your_password";
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        return DriverManager.getConnection(url, username, password);
+    }
+}

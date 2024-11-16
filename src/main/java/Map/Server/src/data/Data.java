@@ -1,17 +1,17 @@
 package Map.Server.src.data;
 
+import java.io.UnsupportedEncodingException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
+import java.util.*;
+import com.google.gson.Gson;
 import Map.Server.src.database.*;
 
 /**
  * Classe Data
- * Avvalora un oggetto data predefinito (fornito dal docente)
- * oppure leggendo i suoi esempi dalla tabella con nome tableName nel database.
- *
+ * Gestisce un dataset memorizzato in una tabella del database oppure come oggetto JSON nel database.
  */
 public class Data {
     /** Lista di esempi */
@@ -19,7 +19,7 @@ public class Data {
 
     /**
      * Costruttore
-     * Crea un'istanza di classe Data leggendo i suoi esempi dalla tabella con nome tableName nel database.
+     * Crea un'istanza della classe Data leggendo i suoi esempi dalla tabella con nome tableName nel database.
      *
      * @param tableName Nome della tabella nel database
      * @throws NoDataException se la tabella è vuota.
@@ -40,6 +40,11 @@ public class Data {
             throw new NoDataException("Errore SQL durante il recupero dei dati dalla tabella: " + e.getMessage() + "\n");
         }
     }
+
+    /**
+     * Costruttore vuoto per deserializzazione.
+     */
+    public Data() {}
 
     /**
      * Metodo getNumberOfExample
@@ -89,5 +94,79 @@ public class Data {
 
         return s.toString();
     }
-}
 
+    /**
+     * Metodo toJSON
+     * Serializza l'oggetto Data in formato JSON.
+     *
+     * @return stringa JSON rappresentante l'oggetto
+     */
+    public String toJSON() {
+        Gson gson = new Gson();
+        return gson.toJson(this);  // Serializza l'oggetto in JSON
+    }
+
+    /**
+     * Metodo statico fromJSON
+     * Deserializza una stringa JSON in un oggetto Data.
+     *
+     * @param json stringa JSON
+     * @return oggetto Data deserializzato
+     */
+    public static Data fromJSON(String json) {
+        Gson gson = new Gson();
+        return gson.fromJson(json, Data.class);  // Deserializza il JSON in un oggetto
+    }
+
+    /**
+     * Salva il dataset come JSON nel database.
+     *
+     * @param connection Connessione al database
+     * @param name Nome identificativo del dataset
+     * @throws SQLException in caso di errori SQL
+     */
+    public void saveToDatabase(Connection connection, String name) throws SQLException {
+        String sql = "INSERT INTO datasets (name, description, data) VALUES (?, ?, ?)";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            // Serializza il dataset in JSON
+            String json = this.toJSON();
+
+            // Imposta i parametri della query
+            ps.setString(1, name);                     // Nome del dataset
+            ps.setString(2, "Serialized Data Object"); // Descrizione
+            ps.setBytes(3, json.getBytes("UTF-8"));    // Dati come BLOB
+
+            ps.executeUpdate(); // Esegue la query
+        } catch (UnsupportedEncodingException e) {
+            throw new SQLException("Errore durante la conversione del dataset in JSON", e);
+        }
+    }
+
+    /**
+     * Carica un dataset dal database, deserializzandolo da JSON.
+     *
+     * @param connection Connessione al database
+     * @param name Nome identificativo del dataset
+     * @return Oggetto Data deserializzato
+     * @throws SQLException in caso di errori SQL
+     */
+    public static Data loadFromDatabase(Connection connection, String name) throws SQLException {
+        String sql = "SELECT data FROM datasets WHERE name = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, name); // Imposta il parametro per il nome del dataset
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    byte[] jsonBytes = rs.getBytes("data"); // Recupera i dati come BLOB
+                    String json = new String(jsonBytes, "UTF-8"); // Converte i byte in una stringa JSON
+
+                    return Data.fromJSON(json); // Deserializza il JSON in un oggetto Data
+                } else {
+                    throw new SQLException("Dataset con nome '" + name + "' non trovato nel database.");
+                }
+            }
+        } catch (UnsupportedEncodingException e) {
+            throw new SQLException("Errore durante la lettura del dataset dal database", e);
+        }
+    }
+}

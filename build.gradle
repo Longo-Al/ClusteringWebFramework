@@ -31,7 +31,7 @@ dependencies {
 
 java {
   toolchain {
-    languageVersion.set(JavaLanguageVersion.of(11))
+    languageVersion.set(JavaLanguageVersion.of(22))
   }
 }
 
@@ -97,7 +97,7 @@ test {
 // Generate the executable Jar (to be included in the Docker container)
 task fatJar(type: Jar) {
     manifest {
-        attributes 'Main-Class': 'Map.servlet.HelloWorldServlet'
+        attributes 'Main-Class': 'Map.servlet.indexServlet'
     }
     archiveBaseName = project.name + '-all'
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
