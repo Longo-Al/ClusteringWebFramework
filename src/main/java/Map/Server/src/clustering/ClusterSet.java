@@ -2,8 +2,8 @@ package Map.Server.src.clustering;
 
 import java.io.Serializable;
 
-import Map.Server.src.data.Data;
-import Map.Server.src.data.InvalidSizeException;
+import Map.Server.src.clustering.Exceptions.InvalidClustersNumberException;
+import Map.Server.src.clustering.Exceptions.InvalidSizeException;
 import Map.Server.src.distance.ClusterDistance;
 
 /**
@@ -57,12 +57,13 @@ class ClusterSet implements Serializable {
 	/**
 	 * Metodo mergeClosestClusters
 	 * restituisce un nuovo insieme di cluster che è la fusione dei due cluster più vicini
+	 * @param <T>
 	 *
 	 * @param distance interfaccia di calcolo della distanza tra due cluster
 	 * @param data dataset
 	 * @return insieme di cluster con i due cluster più vicini fusi
 	 */
-	ClusterSet mergeClosestClusters(ClusterDistance distance, Data data) throws InvalidSizeException, InvalidClustersNumberException {
+	public final <T> ClusterSet mergeClosestClusters(ClusterDistance distance, ClusterableCollection<T> data) throws InvalidSizeException, InvalidClustersNumberException {
 		if ( lastClusterIndex <= 1)
 			throw new InvalidClustersNumberException("Non ci sono abbastanza cluster da fondere");
 
@@ -122,11 +123,12 @@ class ClusterSet implements Serializable {
 	/**
 	 * Metodo toString
 	 * restituisce una stringa contenente gli esempi raggruppati nei cluster
+	 * @param <T>
 	 *
 	 * @param data oggetto di classe Data che modella il dataset su cui il clustering è calcolato
 	 * @return str stringa contenente gli esempi raggruppati nei cluster
 	 */
-	public String toString(Data data){
+	public <T> String toString(ClusterableCollection<T> data){
 		StringBuilder str= new StringBuilder();
 		for(int i=0;i<C.length;i++){
 			if (C[i]!=null) str.append("cluster").append(i).append(":").append(C[i].toString(data)).append("\n");

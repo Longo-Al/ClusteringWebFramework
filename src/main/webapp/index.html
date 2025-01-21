@@ -1,0 +1,163 @@
+﻿<!doctype html>
+<!--
+    This file is part of the DendrogramViewer project. 
+
+    Copyright (c) 2018 Pedro Sequeira (pedrodbs@gmail.com)
+ 
+    Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+    documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+    rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+    permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ 
+    The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
+    Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+    WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
+    OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+    OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+
+<html lang="it">
+<head>
+    <meta charset="utf-8" />
+    <title>Clustering Dendrogram Visualizer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <script>
+        const currentPath = window.location.pathname; // Get the current path of the page
+        const basePath = currentPath.substring(0, currentPath.lastIndexOf('/') + 1); // Extract the directory path
+        
+        const scripts = [
+            "js/d3.v3.min.js",
+            "js/jscolor.js",
+            "js/palette.js",
+            "js/svg-crowbar-2.js",
+            "js/utilFunctions.js",
+            "js/uiFunctions.js",
+            "js/variables.js",
+        ];
+    
+        scripts.forEach(script => {
+            const scriptTag = document.createElement("script");
+            scriptTag.src = basePath + script; // Append the base path to the script path
+            document.head.appendChild(scriptTag); // Add the script to the document
+        });
+    </script>
+
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="#">Dendrogram Visualizer</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="#">Home</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <!-- Colonna laterale sinistra (Lista dataset) -->
+            <div class="col-md-3">
+                <div id="options-column" class="p-3 border">
+                    <p class="options-title">Carica Dendrogramma</p>
+                    <input id="input-file" type="file" accept=".json" onchange="loadFile(this.files)" style="display: none">
+                    <input class="options-box btn btn-primary w-100" id="load-file-btn" type="button" value="Carica..." onclick="document.getElementById('input-file').click();" />
+                    
+                    <hr class="options-box" />
+
+                    <p class="options-title">Opzioni di Visualizzazione</p>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="" id="labels-chkbox" onclick="onShowLabels()">
+                        <label class="form-check-label" for="labels-chkbox">Mostra etichette</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="" id="vert-layout-chkbox" checked onclick="onVertLayout()">
+                        <label class="form-check-label" for="vert-layout-chkbox">Layout verticale</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="" id="straight-chkbox" checked onclick="onStraightLinks()">
+                        <label class="form-check-label" for="straight-chkbox">Collegamenti diretti</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="" id="grayscale-chkbox" onclick="onGrayscale()">
+                        <label class="form-check-label" for="grayscale-chkbox">Scala di grigi</label>
+                    </div>
+                    <div class="form-group mt-3">
+                        <label for="pick-color-btn">Colore di sfondo</label>
+                        <input id="color-picker" type="hidden" onchange="onColorSchemeChanged()" value="none">
+                        <input id="pick-color-btn" type="button" class="jscolor {valueElement: 'color-picker'} w-100">
+                    </div>
+
+                    <hr class="options-line"/>
+                    <button class="btn btn-secondary w-100" id="center-button" onclick="onResetDragZoom()">Reset Vista</button>
+                </div>
+            </div>
+
+            <!-- Colonna centrale per visualizzazione dendrogramma -->
+            <div class="col-md-6">
+                <div id="container" class="border p-3"></div>
+            </div>
+
+            <!-- Colonna laterale destra per altre opzioni -->
+            <div class="col-md-3">
+                <div id="visual-options-column" class="p-3 border">
+                    <p class="options-title">Opzioni Dendrogramma</p>
+                    <div class="form-group">
+                        <label for="num-clusters-slider">Numero di cluster</label>
+                        <div class="d-flex justify-content-between">
+                            <input class="form-control" id="num-clusters-slider" type="range" oninput="onNumClustersChanged(this.value)" onchange="onNumClustersChanged(this.value)">
+                            <div class="ml-2" id="num-clusters-slider-value" style="min-width: 50px; text-align: center;">0</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="threshold-slider">Soglia di distanza</label>
+                        <div class="d-flex justify-content-between">
+                            <input class="form-control" id="threshold-slider" type="range" oninput="onThresholdChanged(this.value)" onchange="onThresholdChanged(this.value)">
+                            <div class="ml-2" id="threshold-slider-value" style="min-width: 50px; text-align: center;">0</div>
+                        </div>
+                    </div>
+                    
+
+                    <hr class="options-line"/>
+                    <button class="btn btn-danger w-100" id="save-button" onclick="saveImage('innerSvg')">Scarica SVG</button>
+                </div>
+                <!-- **** Interaction options **** -->
+                <div id="options-column" class="p-3 border">
+                    <p class="options-title">Opzioni di Interazione</p>
+                    
+                    <div class="form-check">
+                        <label class="form-check-label">
+                            Zoom & Drag:
+                            <input id="zoom-chkbox" type="checkbox" class="form-check-input" onclick="update()">
+                        </label>
+                    </div>
+
+                    <button class="btn btn-primary w-100 mt-3" id="center-button" onclick="onResetDragZoom()">Reset vista</button>
+
+                    <hr class="options-line" />
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        window.onload = function() {
+            window.initUI();
+        };
+    </script>
+
+    <!-- Bootstrap JS e dipendenze -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+</body>
+</html>

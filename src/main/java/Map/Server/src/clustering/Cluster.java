@@ -4,8 +4,7 @@ import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
-
-import Map.Server.src.data.Data;
+import java.util.UUID;
 
 
 /**
@@ -16,11 +15,11 @@ import Map.Server.src.data.Data;
  *
  * @author Team MAP Que Nada
  */
-public class Cluster implements Iterable<Integer>, Cloneable, Serializable {
+public class Cluster implements Iterable<UUID>, Cloneable, Serializable {
 	/**
 	 * Set di interi che rappresenta gli indici degli esempi raggruppati nel cluster
 	 */
-	private Set<Integer> clusteredData =new TreeSet<>();
+	private Set<UUID> clusteredData =new TreeSet<>();
 
 	/**
 	 * Metodo addData
@@ -28,7 +27,7 @@ public class Cluster implements Iterable<Integer>, Cloneable, Serializable {
 	 *
 	 * @param id indice da aggiungere al cluster
 	 */
-	void addData(int id){
+	void addData(UUID id){
         clusteredData.add(id);
 	}
 
@@ -48,7 +47,7 @@ public class Cluster implements Iterable<Integer>, Cloneable, Serializable {
 	 *
 	 * @return clusteredData.iterator() iterator per scorrere gli elementi del cluster
 	 */
-	public Iterator<Integer> iterator() {
+	public Iterator<UUID> iterator() {
 		return clusteredData.iterator();
 	}
 
@@ -64,7 +63,7 @@ public class Cluster implements Iterable<Integer>, Cloneable, Serializable {
 		try {
 			clone = (Cluster) super.clone();
             //noinspection unchecked
-            clone.clusteredData = (Set<Integer>) ((TreeSet<Integer>) this.clusteredData).clone();
+    		clone.clusteredData = new TreeSet<>(this.clusteredData);
 		} catch (CloneNotSupportedException e) {
 			throw new CloneNotSupportedException("Errore nella clonazione!");
 		}
@@ -81,8 +80,8 @@ public class Cluster implements Iterable<Integer>, Cloneable, Serializable {
 	 */
 	Cluster mergeCluster(Cluster c) {
 		Cluster newC = new Cluster();
-		Iterator<Integer> it1 = this.iterator();
-		Iterator<Integer> it2 = c.iterator();
+		Iterator<UUID> it1 = this.iterator();
+		Iterator<UUID> it2 = c.iterator();
 
 		while (it1.hasNext()) {
 			newC.addData(it1.next());
@@ -103,7 +102,7 @@ public class Cluster implements Iterable<Integer>, Cloneable, Serializable {
 	 */
 	public String toString() {
 		StringBuilder str = new StringBuilder();
-		Iterator<Integer> it = this.iterator();
+		Iterator<UUID> it = this.iterator();
 
 		if (it.hasNext())
 			str.append(it.next());
@@ -116,16 +115,17 @@ public class Cluster implements Iterable<Integer>, Cloneable, Serializable {
 
 	/**
 	 * Metodo toString
-	 * restituisce una stringa contenente gli esempi raggruppati nel cluster
+	 * restituisce una stringa contenente gli UUID degli esempi raggruppati nel cluster
+	 * @param <T>
 	 *
 	 * @param data oggetto di classe Data che modella il dataset su cui il clustering è calcolato
 	 * @return str stringa contenente gli esempi raggruppati nel cluster
 	 */
-	public String toString(Data data) {
+	public String toString(ClusterableCollection<?> data) {
 		StringBuilder str = new StringBuilder();
 
-        for (Integer clusteredDatum : clusteredData)
-            str.append("<[").append(data.getExample(clusteredDatum)).append("]>");
+        for (UUID clusteredDatum : clusteredData)
+            str.append("<[").append(data.getClusterable(clusteredDatum)).append("]>");
 
 		return str.toString();
 	}

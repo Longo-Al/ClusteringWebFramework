@@ -6,12 +6,11 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.nio.file.FileAlreadyExistsException;
 
+import Map.Server.src.clustering.ClusterableCollection;
 import Map.Server.src.clustering.HierachicalClusterMiner;
-import Map.Server.src.clustering.InvalidClustersNumberException;
-import Map.Server.src.clustering.InvalidDepthException;
-import Map.Server.src.data.Data;
-import Map.Server.src.data.InvalidSizeException;
-import Map.Server.src.data.NoDataException;
+import Map.Server.src.clustering.Exceptions.InvalidClustersNumberException;
+import Map.Server.src.clustering.Exceptions.InvalidDepthException;
+import Map.Server.src.clustering.Exceptions.InvalidSizeException;
 import Map.Server.src.distance.AverageLinkDistance;
 import Map.Server.src.distance.ClusterDistance;
 import Map.Server.src.distance.SingleLinkDistance;
@@ -23,7 +22,7 @@ class ServerOneClient extends Thread {
     private final Socket clientSocket;
     private final ObjectOutputStream out;
     private final ObjectInputStream in;
-    private Data data; // Memorizza l'oggetto Data caricato
+    private ClusterableCollection<?> data; // Memorizza l'oggetto Data caricato
 
     /**
     * Costruttore per il gestore client.
@@ -50,7 +49,7 @@ class ServerOneClient extends Thread {
                 switch (requestType) {
                     case 0:
                         // Carica dati dal database
-                        handleLoadData();
+                        
                         break;
                     case 1:
                         // Esegui clustering
@@ -81,22 +80,6 @@ class ServerOneClient extends Thread {
     }
 
     /**
-     * Gestisce il caricamento dei dati dal database.
-     *
-     * @throws IOException se si verifica un errore di I/O
-     * @throws ClassNotFoundException se la classe non è trovata
-     */
-    private void handleLoadData() throws IOException, ClassNotFoundException {
-        String tableName = (String) in.readObject();
-        try {
-            this.data = new Data(tableName);
-            out.writeObject("OK");
-        } catch (NoDataException e) {
-            out.writeObject(e.getMessage());
-        }
-    }
-
-    /**
      * Gestisce l'operazione di clustering.
      *
      * @throws IOException se si verifica un errore di I/O
@@ -123,7 +106,6 @@ class ServerOneClient extends Thread {
             String fileName = (String) in.readObject();
 
             try {
-                clustering.salva(fileName);
                 out.writeObject("Dendrogramma salvato correttamente.");
             } catch (FileAlreadyExistsException e) {
                 out.writeObject("Errore. Il file esiste già: " + fileName);
@@ -152,13 +134,13 @@ class ServerOneClient extends Thread {
                 return;
             }
 
-            if (clustering.getDepth() > data.getNumberOfExample()) {
+            if (clustering.getDepth() > data.size()) {
                 out.writeObject("Numero di esempi maggiore della profondità del dendrogramma!");
             } else {
                 out.writeObject("OK");
                 out.writeObject(clustering.toString(data));
             }
-        } catch (IOException | ClassNotFoundException | InvalidDepthException e) {
+        } catch (IOException | InvalidDepthException e) {
             out.writeObject(e.getMessage());
         }
     }

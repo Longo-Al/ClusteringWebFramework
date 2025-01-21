@@ -7,6 +7,8 @@ services:
       - ./build/libs/clusteringwebapp.war:/usr/local/tomcat/webapps/clusteringwebapp.war
     networks:
       - app-network
+    depends_on:
+      - mysql
     
   mysql:
     image: mysql:latest

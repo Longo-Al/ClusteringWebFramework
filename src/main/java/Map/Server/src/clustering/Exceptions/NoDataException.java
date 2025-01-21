@@ -1,4 +1,4 @@
-package Map.Server.src.data;
+package Map.Server.src.clustering.Exceptions;
 
 /** Eccezione lanciata quando non ci sono dati */
 public class NoDataException extends Exception {

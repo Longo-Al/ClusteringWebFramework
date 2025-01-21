@@ -1,9 +1,11 @@
 package  Map.Server.src.distance;
 
+import java.util.UUID;
+
 import Map.Server.src.clustering.Cluster;
-import Map.Server.src.data.Data;
-import Map.Server.src.data.Example;
-import Map.Server.src.data.InvalidSizeException;
+import Map.Server.src.clustering.Clusterable;
+import Map.Server.src.clustering.ClusterableCollection;
+import Map.Server.src.clustering.Exceptions.InvalidSizeException;
 
 /**
  * Classe AverageLinkDistance
@@ -24,12 +26,16 @@ public class AverageLinkDistance implements ClusterDistance {
      * @param d dataset
      * @return media selle distanze tra i cluster
      */
-    public double distance(Cluster c1, Cluster c2, Data d) throws InvalidSizeException {
+    @SuppressWarnings("rawtypes")
+    public double distance(Cluster c1, Cluster c2, ClusterableCollection d) throws InvalidSizeException {
         double sum = 0.0;
 
-        for (Integer integer : c1) {
-            Example e1 = d.getExample(integer);
-            for (Integer value : c2) sum += e1.distance(d.getExample(value));
+        for (UUID id1 : c1) {
+			Clusterable e1 = d.getClusterable(id1);
+            for (UUID id2 : c2) {
+				Clusterable e2 = d.getClusterable(id2);
+				sum += Clusterable.distance(e1,e2);
+            }
         }
 
         return sum / (c1.getSize() * c2.getSize());

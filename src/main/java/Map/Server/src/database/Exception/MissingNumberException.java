@@ -1,4 +1,4 @@
-package Map.Server.src.database;
+package Map.Server.src.database.Exception;
 
 /** Eccezione lanciata quando manca un numero */
 public class MissingNumberException extends Exception {

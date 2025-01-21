@@ -1,8 +1,8 @@
 package  Map.Server.src.distance;
 
 import Map.Server.src.clustering.Cluster;
-import Map.Server.src.data.Data;
-import Map.Server.src.data.InvalidSizeException;
+import Map.Server.src.clustering.ClusterableCollection;
+import Map.Server.src.clustering.Exceptions.InvalidSizeException;
 
 /**
  * Interfaccia ClusterDistance
@@ -21,5 +21,6 @@ public interface ClusterDistance {
 	 * @throws InvalidSizeException se la dimensione del cluster è minore di 2
 	 * @return double
 	 */
-	double distance(Cluster c1, Cluster c2, Data d) throws InvalidSizeException;
+	@SuppressWarnings("rawtypes")
+	double distance(Cluster c1, Cluster c2, ClusterableCollection d) throws InvalidSizeException;
 }

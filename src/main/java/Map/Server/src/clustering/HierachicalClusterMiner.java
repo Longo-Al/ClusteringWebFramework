@@ -1,10 +1,12 @@
 package Map.Server.src.clustering;
 
 import java.io.*;
-import java.nio.file.FileAlreadyExistsException;
 
-import Map.Server.src.data.Data;
-import Map.Server.src.data.InvalidSizeException;
+import java.util.UUID;
+
+import Map.Server.src.clustering.Exceptions.InvalidClustersNumberException;
+import Map.Server.src.clustering.Exceptions.InvalidDepthException;
+import Map.Server.src.clustering.Exceptions.InvalidSizeException;
 import Map.Server.src.distance.ClusterDistance;
 
 /**
@@ -16,9 +18,6 @@ import Map.Server.src.distance.ClusterDistance;
 public class HierachicalClusterMiner implements Serializable {
 	/** dendrogramma */
 	private final Dendrogram dendrogram;
-	/** percorso della directory di salvataggio/caricamento degli oggetti serializzati */
-	private static final String DIRECTORY_PATH = "./saved/";
-
 
 	/**
 	 * Costruttore
@@ -48,17 +47,18 @@ public class HierachicalClusterMiner implements Serializable {
 	 * @throws InvalidSizeException se la dimensione del cluster è minore di 2
 	 * @throws InvalidClustersNumberException se il numero di cluster è minore di 2
 	 */
-	public void mine(Data data, ClusterDistance distance) throws InvalidDepthException, InvalidSizeException, InvalidClustersNumberException {
-		if (getDepth() > data.getNumberOfExample()) {
+	public void mine(ClusterableCollection<?> data, ClusterDistance distance) throws InvalidDepthException, InvalidSizeException, InvalidClustersNumberException {
+		if (getDepth() > data.size()) {
 			throw new InvalidDepthException("Numero di Esempi maggiore della profondità del dendrogramma!\n");
 		}
 
-		ClusterSet level0 = new ClusterSet(data.getNumberOfExample());
-		for (int i = 0; i < data.getNumberOfExample(); i++) {
+		ClusterSet level0 = new ClusterSet(data.size());
+		for (UUID uuid : data) {
 			Cluster c = new Cluster();
-			c.addData(i);
+			c.addData(uuid);
 			level0.add(c);
 		}
+
 		dendrogram.setClusterSet(level0, 0);
 		for (int i = 1; i < getDepth(); i++) {
             ClusterSet nextlevel;
@@ -89,10 +89,16 @@ public class HierachicalClusterMiner implements Serializable {
 	 * @throws InvalidDepthException se la profondità del dendrogramma è minore del numero di esempi
 	 * @return una rappresentazione testuale del dendrogramma
 	 */
-	public String toString(Data data) throws InvalidDepthException {
+	public String toString(ClusterableCollection<?> data) throws InvalidDepthException {
 		return dendrogram.toString(data);
 	}
 
+    public static HierachicalClusterMiner loadHierachicalClusterMiner(String fileName) {
+       System.out.println("not implemented");
+		return null;
+    }
+
+	
 	/**
 	 * Metodo statico per caricare un'istanza di HierachicalClusterMiner da un file
 	 * @param fileName nome del file da cui caricare l'istanza
@@ -102,25 +108,26 @@ public class HierachicalClusterMiner implements Serializable {
 	 * @throws ClassNotFoundException se la classe dell'oggetto serializzato non viene trovata
 	 * @throws IllegalArgumentException se il nome del file è nullo o vuoto
 	 */
-	public static HierachicalClusterMiner loadHierachicalClusterMiner(String fileName) throws IOException, ClassNotFoundException, IllegalArgumentException {
-		if (fileName == null || fileName.trim().isEmpty()) {
-			throw new IllegalArgumentException("Il nome del file non può essere nullo o vuoto");
-		}
-		String filePath = DIRECTORY_PATH + fileName;
-		File file = new File(filePath);
-		if (!file.exists()) {
-			throw new FileNotFoundException("File non trovato: " + fileName);
-		}
-		try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filePath))) {
-			HierachicalClusterMiner readFile = (HierachicalClusterMiner) ois.readObject();
-			ois.close();
-			return readFile;
-        } catch (FileNotFoundException e) {
-			throw new FileNotFoundException("File non trovato: " + fileName);
-		}
+	//	public static HierachicalClusterMiner<T> loadHierachicalClusterMiner(String fileName) throws IOException, ClassNotFoundException, IllegalArgumentException {
+	//		if (fileName == null || fileName.trim().isEmpty()) {
+	//			throw new IllegalArgumentException("Il nome del file non può essere nullo o vuoto");
+	//		}
+	//		String filePath = DIRECTORY_PATH + fileName;
+	//		File file = new File(filePath);
+	//		if (!file.exists()) {
+	//			throw new FileNotFoundException("File non trovato: " + fileName);
+	//		}
+	//		try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filePath))) {
+	//			HierachicalClusterMiner<T> readFile = (HierachicalClusterMiner) ois.readObject();
+	//			ois.close();
+	//			return readFile;
+    //	    } catch (FileNotFoundException e) {
+	//			throw new FileNotFoundException("File non trovato: " + fileName);
+	//		}
+	//	
+	//	
+	//	}
 
-
-	}
 
 	/**
 	 * Metodo per salvare l'istanza corrente di HierachicalClusterMiner su un file
@@ -129,45 +136,45 @@ public class HierachicalClusterMiner implements Serializable {
 	 * @throws IOException se si verifica un errore di input/output
 	 * @throws IllegalArgumentException se il nome del file è nullo o vuoto
 	 */
-	public void salva(String fileName) throws FileNotFoundException, IOException, IllegalArgumentException {
-		final String invalidRegex = "[<>:\"|?*]";
-		final String validRegex = "^[\\w,\\s-]+\\.(txt|csv|json|xml|dat|bin|ser)$";
-
-		if (fileName == null || fileName.trim().isEmpty()) {
-			throw new IllegalArgumentException("Il nome del file non può essere nullo o vuoto");
-		}
-
-		if (fileName.matches(invalidRegex)) {
-			throw new IOException("Il nome del file contiene caratteri non validi.");
-		}
-
-		if (!fileName.matches(validRegex)) {
-			throw new IOException("Estensione del file non valida. Assicurati che il nome del file termini con una delle seguenti estensioni: .txt, .csv, .json, .xml, .dat, .bin, .ser");
-		}
-
-		fileName = fileName.replace("\\", File.separator).replace("/", File.separator);
-
-		File directory = new File(DIRECTORY_PATH);
-		if (!directory.exists() && !directory.mkdirs()) {
-			throw new IOException("Impossibile creare la directory: " + DIRECTORY_PATH);
-		}
-
-		String filePath = DIRECTORY_PATH + fileName;
-		File file = new File(filePath);
-
-		if (file.exists()) {
-			throw new FileAlreadyExistsException("Il file esiste già: " + fileName);
-		}
-
-		File parentDir = file.getParentFile();
-		if (parentDir != null && !parentDir.exists() && !parentDir.mkdirs()) {
-			throw new IOException("Impossibile creare la directory: " + parentDir.getAbsolutePath());
-		}
-
-		try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file))) {
-			oos.writeObject(this);
-        }
-	}
-
+	//public void salva(String fileName) throws FileNotFoundException, IOException, IllegalArgumentException {
+	//	final String invalidRegex = "[<>:\"|?*]";
+	//	final String validRegex = "^[\\w,\\s-]+\\.(txt|csv|json|xml|dat|bin|ser)$";
+	//
+	//	if (fileName == null || fileName.trim().isEmpty()) {
+	//		throw new IllegalArgumentException("Il nome del file non può essere nullo o vuoto");
+	//	}
+	//
+	//	if (fileName.matches(invalidRegex)) {
+	//		throw new IOException("Il nome del file contiene caratteri non validi.");
+	//	}
+	//
+	//	if (!fileName.matches(validRegex)) {
+	//		throw new IOException("Estensione del file non valida. Assicurati che il nome del file termini con una delle seguenti estensioni: .txt, .csv, .json, .xml, .dat, .bin, .ser");
+	//	}
+	//
+	//	fileName = fileName.replace("\\", File.separator).replace("/", File.separator);
+	//
+	//	File directory = new File(DIRECTORY_PATH);
+	//	if (!directory.exists() && !directory.mkdirs()) {
+	//		throw new IOException("Impossibile creare la directory: " + DIRECTORY_PATH);
+	//	}
+	//
+	//	String filePath = DIRECTORY_PATH + fileName;
+	//	File file = new File(filePath);
+	//
+	//	if (file.exists()) {
+	//		throw new FileAlreadyExistsException("Il file esiste già: " + fileName);
+	//	}
+	//
+	//	File parentDir = file.getParentFile();
+	//	if (parentDir != null && !parentDir.exists() && !parentDir.mkdirs()) {
+	//		throw new IOException("Impossibile creare la directory: " + parentDir.getAbsolutePath());
+	//	}
+	//
+	//	try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file))) {
+	//		oos.writeObject(this);
+    //    }
+	//}
+	
 }
 

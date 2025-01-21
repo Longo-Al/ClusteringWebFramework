@@ -2,7 +2,7 @@ package Map.Server.src.clustering;
 
 import java.io.Serializable;
 
-import Map.Server.src.data.Data;
+import Map.Server.src.clustering.Exceptions.InvalidDepthException;
 
 /**
  * Classe Dendrogram
@@ -68,10 +68,11 @@ class Dendrogram implements Serializable {
     /**
      * Metodo toString
      * Restituisce una rappresentazione testuale del dendrogramma
+     * @param <T>
      * @param data dataset di esempi
      * @return una rappresentazione testuale del dendrogramma
      */
-    public String toString(Data data) {
+    public <T> String toString(ClusterableCollection<T> data) {
         StringBuilder v= new StringBuilder();
         for (int i=0;i<tree.length;i++)
             v.append("level").append(i).append(":\n").append(tree[i].toString(data)).append("\n");

@@ -1,4 +1,4 @@
-package Map.Server.src.database;
+package Map.Server.src.database.Exception;
 
 /** Eccezione lanciata quando un insieme è vuoto */
 public class EmptySetException extends Exception {

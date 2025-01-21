@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+import Map.Server.src.database.Exception.DatabaseConnectionException;
+
 /**
  * Gestisce l'accesso al DB per la lettura dei dati di training
  * @author Map Tutor
@@ -15,7 +17,7 @@ public class DbAccess {
     /** Nome del DBMS da utilizzare */
     private final String DBMS = "jdbc:mysql";
     /** Indirizzo del server da utilizzare */
-    private final String SERVER = "0.0.0.0";
+    private final String SERVER = "mysql";
     /** Nome del database da utilizzare */
     private final String DATABASE = "MapDB";
     /** Porta del server da utilizzare */
@@ -27,6 +29,10 @@ public class DbAccess {
     /** Connessione al database */
     private Connection conn;
 
+    public DbAccess() throws DatabaseConnectionException{
+        initConnection();
+    }
+
     /**
      * Inizializza la connessione al database.
      *
@@ -37,13 +43,11 @@ public class DbAccess {
         try {
             Class.forName(DRIVER_CLASS_NAME);
         } catch(ClassNotFoundException e) {
-            System.out.println("[!] Driver not found: " + e.getMessage());
-            throw new DatabaseConnectionException(e.toString());
+            String s = ("[!] Driver not found: " + e.getMessage());
+            throw new DatabaseConnectionException(s);
         }
         String connectionString = DBMS + "://" + SERVER + ":" + PORT + "/" + DATABASE
                 + "?user=" + USER_ID + "&password=" + PASSWORD + "&serverTimezone=UTC";
-
-
         try {
             conn = DriverManager.getConnection(connectionString);
         } catch(SQLException e) {
@@ -58,7 +62,9 @@ public class DbAccess {
      * @throws DatabaseConnectionException Eccezione lanciata se la connessione al database fallisce.
      */
     public Connection getConnection() throws DatabaseConnectionException{
-        this.initConnection();
+        if (conn == null){
+            this.initConnection();
+        }
         return conn;
     }
 
@@ -69,6 +75,7 @@ public class DbAccess {
      */
     public void closeConnection() throws SQLException {
         conn.close();
+        conn = null;
     }
 
 }

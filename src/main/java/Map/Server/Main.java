@@ -1,8 +1,5 @@
 package Map.Server;
 
-
-import Map.Server.src.server_core.MultiServer;
-
 /**
  * Classe main del Server.
  */
@@ -33,7 +30,6 @@ public class Main {
             return;
         }
 
-        System.out.println("Server avviato sulla porta " + port);
-        MultiServer.instanceMultiServer(port);
+        
     }
 }

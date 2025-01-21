@@ -1,9 +1,6 @@
 plugins {
     id 'java'
     id 'war'
-    id 'checkstyle'
-    id 'pmd'
-    id 'com.github.spotbugs' version '5.0.13'
     id 'application'
 }
 
@@ -17,12 +14,12 @@ repositories {
 }
 
 dependencies {
+    implementation 'org.apache.commons:commons-text:1.10.0'
     implementation 'javax.servlet:javax.servlet-api:4.0.1'
     implementation files('libs/mysql-connector-java-8.0.17.jar')
     implementation files('libs/gson-2.10.1.jar')
     testImplementation platform('org.junit:junit-bom:5.9.2')
     testImplementation 'org.junit.jupiter:junit-jupiter'
-    compileOnly "com.github.spotbugs:spotbugs-annotations:${spotbugs.toolVersion.get()}"
 }
 
 /**************
@@ -35,51 +32,23 @@ java {
   }
 }
 
-checkstyle {
-    ignoreFailures = true
-    toolVersion '10.8.1'
-}
-
-pmd {
-    ignoreFailures = true
-    toolVersion = '6.55.0'
-    consoleOutput = true
-    ruleSets = []
-    ruleSetFiles = files("$projectDir/config/pmd/pmd-ruleset.xml")
-    reportsDir = file("$buildDir/reports/pmd")
-}
-
-spotbugs {
-    ignoreFailures = true
-    toolVersion = '4.7.3'
-}
-
 /***********
 * TASK SETUP
 ************/
-
-checkstyleMain {
-    source = 'src/main/java'
-}
-
-checkstyleTest {
-    source = 'src/test/java'
-}
-
 run {
     standardInput = System.in
 }
 
-war {
-    archiveFileName = 'clusteringwebapp.war'
+tasks.war {
+    from 'src/main/webapp/' // Includi i file statici nella radice del WAR
+    archiveFileName = "${project.name}.war"
+    webInf {
+        from 'src/main/webapp/WEB-INF' // Include eventuali file in WEB-INF
+    }
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-tasks.withType(com.github.spotbugs.snom.SpotBugsTask) {
-    reports {
-        xml.enabled = true
-        html.enabled = true
-    }
-}
 
 test {
     // Use JUnit 5
@@ -93,17 +62,6 @@ test {
         events 'passed', 'skipped', 'failed'
     }
 }
-
-// Generate the executable Jar (to be included in the Docker container)
-task fatJar(type: Jar) {
-    manifest {
-        attributes 'Main-Class': 'Map.servlet.indexServlet'
-    }
-    archiveBaseName = project.name + '-all'
-    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
-}
-project.tasks.getByName('build').dependsOn fatJar
 
 /***********************
 * MAIN CLASS DECLARATION
