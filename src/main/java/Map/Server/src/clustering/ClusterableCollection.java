@@ -11,7 +11,7 @@ import java.util.Map;
 import Map.Server.src.clustering.Interface.ClusterableItem;
 import Map.Server.src.clustering.Exceptions.InvalidSizeException;
 
-public class ClusterableCollection<T> implements Iterable<UUID> {
+public class ClusterableCollection<T extends ClusterableItem<?>> implements Iterable<UUID> {
     private final Map<UUID, Clusterable> clusters;
 
     public ClusterableCollection() {

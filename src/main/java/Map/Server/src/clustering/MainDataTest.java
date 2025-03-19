@@ -11,11 +11,17 @@ import java.util.List;
 import com.google.gson.JsonParseException;
 
 import Map.Server.item_types.Example;
+import Map.Server.src.clustering.Exceptions.InvalidClustersNumberException;
+import Map.Server.src.clustering.Exceptions.InvalidDepthException;
+import Map.Server.src.clustering.Exceptions.InvalidSizeException;
 import Map.Server.src.clustering.Interface.ClusterableItem;
 import Map.Server.src.database.DbAccess;
 import Map.Server.src.database.JsonSafeConverter;
 import Map.Server.src.database.Exception.DatabaseConnectionException;
 import Map.Server.src.database.Pojo.Dataset;
+import Map.Server.src.clustering.distance.AverageLinkDistance;
+import Map.Server.src.clustering.distance.ClusterDistance;
+import Map.Server.src.clustering.distance.SingleLinkDistance;
 
 public class MainDataTest {
     
@@ -53,11 +59,23 @@ public class MainDataTest {
             
             
             List<? extends ClusterableItem<?>> reloaded = JsonSafeConverter.parseBlob(downloaded.getData(), downloaded.getType());
+            
             //Lo rialloco    
-            final ClusterableCollection<? extends ClusterableItem<?>> reBasic = new ClusterableCollection(reloaded);
+            final ClusterableCollection<? extends ClusterableItem<?>> reBasic = new ClusterableCollection<>(reloaded);
             System.out.println("Riallocato:");
             System.out.println(reBasic.getRawData());
+
+            HierachicalClusterMiner<? extends ClusterableItem<?>> miner = new HierachicalClusterMiner<>(reBasic,reBasic.size());
+            ClusterDistance aver = new AverageLinkDistance();
+            ClusterDistance best_fit = new SingleLinkDistance();
             connection.close();
+            miner.mine(aver);
+            System.out.println("Average Test:");
+            System.out.println(miner.toVerboseString());
+            System.out.println("best_fit Test:");
+            miner.mine(best_fit);
+            System.out.println(miner.toVerboseString());
+            System.out.println(miner.toJson());
             
         } catch (SQLException | DatabaseConnectionException e) {
             System.out.println("Qualcosa sembra non funzionare con il tuo DB;" + e.getMessage());
@@ -65,6 +83,15 @@ public class MainDataTest {
             System.out.println("Problema con la conversione Json to obj;");
         } catch (ClassNotFoundException e) {
             System.out.println("La classe richiesta non è stata trovata o non può essere utilizzata;");
+        } catch (InvalidDepthException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (InvalidSizeException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (InvalidClustersNumberException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
     }
     

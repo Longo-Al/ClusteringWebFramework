@@ -17,7 +17,7 @@ public class DbAccess {
     /** Nome del DBMS da utilizzare */
     private final String DBMS = "jdbc:mysql";
     /** Indirizzo del server da utilizzare */
-    private final String SERVER = "mysql";
+    private final String SERVER = "localhost";
     /** Nome del database da utilizzare */
     private final String DATABASE = "MapDB";
     /** Porta del server da utilizzare */
@@ -27,7 +27,7 @@ public class DbAccess {
     /** Password per l'accesso al database */
     private final String PASSWORD = "map";
     /** Connessione al database */
-    private Connection conn;
+    private Connection conn ;
 
     public DbAccess() throws DatabaseConnectionException{
         initConnection();
@@ -46,8 +46,7 @@ public class DbAccess {
             String s = ("[!] Driver not found: " + e.getMessage());
             throw new DatabaseConnectionException(s);
         }
-        String connectionString = DBMS + "://" + SERVER + ":" + PORT + "/" + DATABASE
-                + "?user=" + USER_ID + "&password=" + PASSWORD + "&serverTimezone=UTC";
+        String connectionString = DBMS + "://" + SERVER + ":" + PORT + "/" + DATABASE + "?user=" + USER_ID + "&password=" + PASSWORD + "&serverTimezone=UTC";
         try {
             conn = DriverManager.getConnection(connectionString);
         } catch(SQLException e) {
@@ -68,6 +67,8 @@ public class DbAccess {
         return conn;
     }
 
+
+
     /**
      * Chiude la connessione al database.
      *
@@ -77,5 +78,4 @@ public class DbAccess {
         conn.close();
         conn = null;
     }
-
 }

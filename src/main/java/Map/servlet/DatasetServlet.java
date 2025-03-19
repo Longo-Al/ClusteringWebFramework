@@ -2,6 +2,7 @@ package Map.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -19,6 +20,8 @@ import Map.Server.src.database.JsonSafeConverter;
 import Map.Server.src.database.Exception.DatabaseConnectionException;
 import Map.Server.src.database.Pojo.Dataset;
 
+import java.util.Base64;
+
 public class DatasetServlet extends HttpServlet {
     private DbAccess dbAccess;
     @Override
@@ -30,19 +33,48 @@ public class DatasetServlet extends HttpServlet {
         }
     }
 
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String pathInfo = request.getPathInfo();
-        response.setContentType("application/json");
-        try (PrintWriter out = response.getWriter()) {
-            Connection connection = dbAccess.getConnection();
-            if (pathInfo == null || pathInfo.equals("/")) {
-                // Get all datasets (without data field)
-                try (ResultSet rs = Dataset.getInfosFromDb(connection)) {
-                    out.print("[");
-                    boolean first = true;
-                    while (rs.next()) {
-                        if (!first) out.print(",");
+   
+
+@Override
+protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    String pathInfo = request.getPathInfo();
+    response.setContentType("application/json");
+    try (PrintWriter out = response.getWriter()) {
+        Connection connection = dbAccess.getConnection();
+        if (pathInfo == null || pathInfo.equals("/")) {
+            // Get all datasets (without data field)
+            try (ResultSet rs = Dataset.getInfosFromDb(connection)) {
+                out.print("[");
+                boolean first = true;
+                while (rs.next()) {
+                    if (!first) out.print(",");
+                    out.print("{" +
+                            "\"id\":" + rs.getInt("id") + "," +
+                            "\"name\":\"" + rs.getString("name") + "\"," +
+                            "\"description\":\"" + rs.getString("description") + "\"," +
+                            "\"size\":" + rs.getLong("size") + "," +
+                            "\"created_at\":\"" + rs.getTimestamp("created_at") + "\"," +
+                            "\"updated_at\":\"" + rs.getTimestamp("updated_at") + "\"," +
+                            "\"type\":\"" + rs.getString("type") + "\"," +
+                            "\"tags\":\"" + rs.getString("tags") + "\"}");
+                    first = false;
+                }
+                out.print("]");
+            }
+        } else {
+            // Get dataset by ID (with data field)
+            String[] parts = pathInfo.split("/");
+            if (parts.length == 2) {
+                int id = Integer.parseInt(parts[1]);
+                try (ResultSet rs = Dataset.getbyId(connection, id)) {
+                    if (rs.next()) {
+                        byte[] dataBytes = rs.getBytes("data");
+                        // Se i dati sono codificati in base64, decodificali
+                        String dataString = new String(dataBytes, StandardCharsets.UTF_8);  // supponiamo che i dati siano UTF-8
+                        // Aggiungi la codifica base64 solo se i dati sono binari
+                        String base64Data = Base64.getEncoder().encodeToString(dataBytes); 
+
+                        // Scrivi la risposta JSON
                         out.print("{" +
                                 "\"id\":" + rs.getInt("id") + "," +
                                 "\"name\":\"" + rs.getString("name") + "\"," +
@@ -51,44 +83,25 @@ public class DatasetServlet extends HttpServlet {
                                 "\"created_at\":\"" + rs.getTimestamp("created_at") + "\"," +
                                 "\"updated_at\":\"" + rs.getTimestamp("updated_at") + "\"," +
                                 "\"type\":\"" + rs.getString("type") + "\"," +
+                                "\"data\":\"" + base64Data + "\"," +
                                 "\"tags\":\"" + rs.getString("tags") + "\"}");
-                        first = false;
+                    } else {
+                        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                        out.print("{\"error\":\"Dataset not found \"}");
                     }
-                    out.print("]");
                 }
             } else {
-                // Get dataset by ID (with data field)
-                String[] parts = pathInfo.split("/");
-                if (parts.length == 2) {
-                    int id = Integer.parseInt(parts[1]);
-                    try (ResultSet rs = Dataset.getbyId(connection, id)) {
-                        if (rs.next()) {
-                            out.print("{" +
-                                    "\"id\":" + rs.getInt("id") + "," +
-                                    "\"name\":\"" + rs.getString("name") + "\"," +
-                                    "\"description\":\"" + rs.getString("description") + "\"," +
-                                    "\"size\":" + rs.getLong("size") + "," +
-                                    "\"created_at\":\"" + rs.getTimestamp("created_at") + "\"," +
-                                    "\"updated_at\":\"" + rs.getTimestamp("updated_at") + "\"," +
-                                    "\"type\":\"" + rs.getString("type") + "\"," +
-                                    "\"data\":\"" + new String(rs.getBytes("data")) + "\"," +
-                                    "\"tags\":\"" + rs.getString("tags") + "\"}");
-                        } else {
-                            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                            out.print("{\"error\":\"Dataset not found \"}");
-                        }
-                    }
-                } else {
-                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    out.print("{\"error\":\"Invalid request: can't parse path \"}");
-                }
-                out.close();
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                out.print("{\"error\":\"Invalid request: can't parse path \"}");
             }
-        } catch (SQLException | DatabaseConnectionException | DataReadException e) {
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().print("{\"error\":\"" + e.getMessage() + "\"}");
         }
+        out.close();
+    } catch (SQLException | DatabaseConnectionException | DataReadException e) {
+        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        response.getWriter().print("{\"error\":\"" + e.getMessage() + "\"}");
     }
+}
+
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

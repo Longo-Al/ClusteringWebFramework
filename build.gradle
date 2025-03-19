@@ -7,7 +7,11 @@ plugins {
 group = 'Map'
 version = '1.0-SNAPSHOT'
 
-sourceCompatibility = '11'
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+}
 
 repositories {
     mavenCentral()
@@ -22,21 +26,16 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }
 
-/**************
-* PLUGINS SETUP
-***************/
+/******************
+ * TASK SETUP
+ ******************/
 
-java {
-  toolchain {
-    languageVersion.set(JavaLanguageVersion.of(22))
-  }
+tasks.register('cleanBuild', Delete) {
+    delete rootProject.buildDir
 }
 
-/***********
-* TASK SETUP
-************/
-run {
-    standardInput = System.in
+tasks.named('build') {
+    dependsOn 'cleanBuild'
 }
 
 tasks.war {
@@ -45,26 +44,21 @@ tasks.war {
     webInf {
         from 'src/main/webapp/WEB-INF' // Include eventuali file in WEB-INF
     }
-
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-
 test {
-    // Use JUnit 5
     useJUnitPlatform()
-
-    // Always run tests, even when nothing changed.
     dependsOn 'cleanTest'
-
-    // Show test results.
     testLogging {
         events 'passed', 'skipped', 'failed'
     }
 }
 
 /***********************
-* MAIN CLASS DECLARATION
-************************/
+ * MAIN CLASS DECLARATION
+ ***********************/
 
-mainClassName = 'Map.Client.MainTest'
+application {
+    mainClass = 'Map.Client.MainTest'
+}

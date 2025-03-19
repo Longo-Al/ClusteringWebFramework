@@ -1,30 +1,4 @@
-﻿/**
- * @file uiFunctions.js
- * 
- * Copyright (c) 2018 Pedro Sequeira (pedrodbs@gmail.com)
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
- * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
- * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
- * Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
- * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
- * OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
- * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- * @version 1.0
- * @author  Pedro Sequeira (pedrodbs@gmail.com)
- * @updated 05/17/2018
- * @link    https://github.com/pedrodbs/DendrogramViewer
- *
- */
-
-
-// #region Json file loading
+﻿// #region Json file loading
 
 /**
  * Reads the json dendrogram data from the given file.
@@ -92,7 +66,9 @@ function initUI() {
 
     // adds overall svg
     window.svg = window.topSvg.append("svg:svg")
-        .attr("id", "innerSvg");
+        .attr("id", "innerSvg")
+        .attr("width", window.innerWidth || 800)  // Valori di fallback
+        .attr("height", window.innerHeight || 600);
 
     // adds a rectangle as a background
     window.backgRect = window.svg.append("rect")
@@ -123,7 +99,6 @@ function initUI() {
     //reads data and initializes graph
     loadFromUrl();
 }
-
 /**
  * Reads all dendrogram / clustering information from the given Json object.
  * @param {object}  clusterJsonObj  The Json object containing all the dendrogram / clustering information.
@@ -267,7 +242,7 @@ function updateVariables() {
 function updatePageElements() {
 
     // calculates max dimensions
-    const windowDiscount = 20;
+    const windowDiscount = 40;
     const optionsWidth = document.getElementById("save-button").offsetWidth + 20;
     window.width = window.innerWidth - optionsWidth - windowDiscount;
     window.height = window.innerHeight - windowDiscount;
@@ -283,6 +258,7 @@ function updatePageElements() {
     window.cluster.size(window.vertLayout
         ? [window.width - window.treeMargin, window.height]
         : [window.height - window.treeMargin, window.width]);
+
     window.backgRect.style("fill", `#${document.getElementById("color-picker").value}`);
     window.backgRect.attr("width", window.width)
     window.backgRect.attr("height", window.height)

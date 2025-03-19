@@ -1,31 +1,28 @@
-﻿/*
- *
- * Copyright (c) 2018 Pedro Sequeira (pedrodbs@gmail.com)
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
- * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
- * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to the following conditions:
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
- * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
- * OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR
- * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- */
+﻿/* Importazione del font Poppins */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
 
-/* 
- * ==========================================================================
- *    FONT DEFINITIONS - Utilizzo di Google Fonts
- * ========================================================================== 
-*/
-@import url('https://fonts.googleapis.com/css2?family=Candara&display=swap');
+/* Definizione dei font */
+@font-face {
+    font-family: 'Poppins';  
+    src: url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap");
+    font-weight: normal;  
+}
 
-/* 
- * ==========================================================================
- *    Global rules for specific elements to avoid conflicts with Bootstrap
- * ========================================================================== 
-*/
+@font-face {
+    font-family: Candara;  
+    src: local('Candara'), url("fonts/Candara/Candara.ttf") format('truetype');  
+    font-weight: normal;  
+}
+
+/* Global rules */
+* {
+    font-size: 16px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: normal;
+    color: #333;
+    fill: #333;
+    stroke: none;
+}
 
 .options-box-value,
 .options-title,
@@ -34,193 +31,88 @@
 .options-select option,
 .chkbox-box,
 .jscolor {
-    font-size: 14px;
-    font-family: 'Candara', sans-serif;
-    font-weight: normal;
-    color: black;
+    font-family: 'Poppins', sans-serif;
+    color: #333;
 }
 
 table {
     border: none;
     border-collapse: collapse;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 table td {
-    border: 1px solid #777;
+    border: 1px solid #ccc;
     vertical-align: top;
+    padding: 5px;
 }
 
+/* Separazione del container dalla tabella con le opzioni */
 #container {
-    /*border: 1px solid #777;*/
-    fill: none;
+    width: inherit;
+    height: inherit;
+    margin: 0 auto;
+    display: block;
 }
 
-/* 
- * ==========================================================================
- *    Side options styles
- * ========================================================================== 
-*/
-
-.noUi-horizontal,
-.options-title,
-.options-box,
-.options-line,
-.chkbox-box {
-    margin-top: 10px;
-    margin-bottom: 10px;
-    margin-left: 10px;
-    margin-right: 10px;
+#options-panel {
+    width: 350px;
+    margin: 20px auto;
 }
 
-.options-box-value { 
-    float: right; 
-}
-
+/* Stili delle opzioni laterali */
+.options-box-value { float: right; }
 .options-select {
-    background: #eee;
-    border: 1px solid #777;
+    background: #f0f0f0;
+    border: 1px solid #aaa;
     width: 140px;
-    margin-top: 5px;
-    margin-bottom: 5px;
     font-size: 14px;
     font-style: italic;
-}
-
-.options-select option:checked { 
-    box-shadow: 0 0 10px 100px #444 inset; 
+    border-radius: 4px;
+    padding: 4px;
 }
 
 .options-title {
     font-weight: bold;
     text-align: left;
-    margin-bottom: 10px;
+    font-size: larger;
 }
 
 .chkbox-box {
-    margin-top: 10px;
-    margin-bottom: 10px;
     text-align: left;
 }
 
-#pick-color-btn {
-    border: 1px solid #777;
-    width: 10px;
-    height: 10px;
-    padding: 10px;
-}
-
-#pick-color-btn:hover {
-    background: #444;
-    color: white;
-}
-
-.options-line {
-    background-color: #777;
-    height: 1px;
-    border: 0 none;
-    margin-top: 20px;
-}
-
-/* 
- * ==========================================================================
- *    Custom range slider (No conflict with Bootstrap styles)
- * ========================================================================== 
-*/
-
-input[type=range] {
-    -webkit-appearance: none; /* Hides the slider so that custom slider can be made */
-    width: 140px; /* Specific width is required for Firefox */
-    background: transparent;
-    margin-top: -5px;
-    margin-bottom: 0;
-}
-
-input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    border: 1px solid #777;
-    width: 20px;
-    height: 20px;
-    border-radius: 0;
-    background-color: #eee;
-    cursor: pointer;
-    margin-top: -14px;
-}
-
-input[type=range]:hover::-webkit-slider-thumb {
-    background-color: #444;
-}
-
-input[type=range]::-moz-range-thumb {
-    border: 1px solid #777;
-    width: 20px;
-    height: 20px;
-    border-radius: 0;
-    background-color: #eee;
-    cursor: pointer;
-}
-
-input[type=range]:hover::-moz-range-thumb {
-    background-color: #444;
-}
-
-/* Range track style */
-input[type=range]::-webkit-slider-runnable-track {
-    width: 120px;
-    height: 2px;
-    cursor: pointer;
-    background: white;
-    border-radius: 0;
-    border: 1px solid #777;
-}
-
-/* Custom checkbox styles */
+/* Custom checkbox */
 input[type="checkbox"] {
     display: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
 }
 
 input[type="checkbox"] + label {
-    background-color: #eee;
-    border: 1px solid #777;
-    padding: 10px;
+    background-color: #f0f0f0;
+    border: 1px solid #aaa;
     display: inline-block;
     position: relative;
-    transition: all 0.3s ease;
+    border-radius: 4px;
+    width: 15px;
+    height: 15px;
 }
 
-input[type="checkbox"]:hover + label {
+input[type="checkbox"]:checked + label {
     background-color: #444;
     color: white;
 }
 
-input[type="checkbox"]:checked + label { 
-    color: #000; 
-}
-
-input[type="checkbox"]:checked + label:after {
-    content: '\2714';
-    font-size: 15px;
-    position: absolute;
-    top: -2px;
-    left: 4px;
-    color: #000;
-}
-
-/* Custom button styles */
+/* Custom button */
 input[type=button] {
-    font: 14px 'Candara', sans-serif;
+    font: 16px 'Poppins', sans-serif;
     width: 140px;
-    border: 1px solid #777;
+    border: 1px solid #aaa;
     color: #000;
-    background: #eee;
+    background: #e6e6e6;
     cursor: pointer;
-    display: inline-block;
-    height: 30px;
-    padding: 0px 10px;
-    text-transform: none;
-    text-align: center;
-    transition: all 0.3s ease;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 input[type=button]:hover {
@@ -229,33 +121,21 @@ input[type=button]:hover {
 }
 
 /* D3 Tree styles */
-.node { 
-    cursor: pointer; 
-}
+.node { cursor: pointer; }
 
 .node circle {
     fill: #fff;
     stroke-width: 1.5px;
+    stroke: #333;
 }
 
 .node text {
-    font-family: 'Candara', sans-serif;
-    font-weight: normal;
+    font-family: 'Poppins', sans-serif;
+    fill: #333;
 }
 
 .link {
     fill: none;
     stroke-width: 1.5px;
-}
-
-.threshLine {
-    stroke-width: 1px;
-    stroke-dasharray: 2;
-    stroke: #777;
-}
-
-.label {
-    font-size: 16px;
-    font-family: 'Candara', sans-serif;
-    font-weight: bold;
+    stroke: #999;
 }

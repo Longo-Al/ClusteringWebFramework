@@ -11,9 +11,11 @@ import Map.Server.src.clustering.HierachicalClusterMiner;
 import Map.Server.src.clustering.Exceptions.InvalidClustersNumberException;
 import Map.Server.src.clustering.Exceptions.InvalidDepthException;
 import Map.Server.src.clustering.Exceptions.InvalidSizeException;
-import Map.Server.src.distance.AverageLinkDistance;
-import Map.Server.src.distance.ClusterDistance;
-import Map.Server.src.distance.SingleLinkDistance;
+import Map.Server.src.clustering.Exceptions.NoDataException;
+import Map.Server.src.clustering.Interface.ClusterableItem;
+import Map.Server.src.clustering.distance.AverageLinkDistance;
+import Map.Server.src.clustering.distance.ClusterDistance;
+import Map.Server.src.clustering.distance.SingleLinkDistance;
 
 /**
 * Gestore client per gestire le connessioni con i client.
@@ -22,7 +24,7 @@ class ServerOneClient extends Thread {
     private final Socket clientSocket;
     private final ObjectOutputStream out;
     private final ObjectInputStream in;
-    private ClusterableCollection<?> data; // Memorizza l'oggetto Data caricato
+    private ClusterableCollection<? extends ClusterableItem<?>> data; // Memorizza l'oggetto Data caricato
 
     /**
     * Costruttore per il gestore client.
@@ -53,11 +55,16 @@ class ServerOneClient extends Thread {
                         break;
                     case 1:
                         // Esegui clustering
-                        handleClustering();
+                        try {
+                            handleClustering();
+                        } catch (NoDataException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
                         break;
                     case 2:
                         // Carica il dendrogram da file
-                        handleLoadDendrogramFromFile();
+
                         break;
                     default:
                         out.writeObject("Tipo di richiesta non valido");
@@ -84,8 +91,9 @@ class ServerOneClient extends Thread {
      *
      * @throws IOException se si verifica un errore di I/O
      * @throws ClassNotFoundException se la classe non è trovata
+     * @throws NoDataException 
      */
-    private void handleClustering() throws IOException, ClassNotFoundException {
+    private void handleClustering() throws IOException, ClassNotFoundException, NoDataException {
         if (data == null) {
             out.writeObject("Dati non caricati");
             return;
@@ -95,13 +103,13 @@ class ServerOneClient extends Thread {
         int distanceType = (int) in.readObject();
 
         try {
-            HierachicalClusterMiner clustering = new HierachicalClusterMiner(depth);
+            HierachicalClusterMiner<? extends ClusterableItem<?>> clustering = new HierachicalClusterMiner<>(data,depth);
             ClusterDistance distance = distanceType == 1 ? new SingleLinkDistance() : new AverageLinkDistance();
 
-            clustering.mine(data, distance);
+            clustering.mine(distance);
 
             out.writeObject("OK");
-            out.writeObject(clustering.toString(data));
+            out.writeObject(clustering.toString());
 
             String fileName = (String) in.readObject();
 
@@ -117,32 +125,5 @@ class ServerOneClient extends Thread {
         }
     }
 
-
-    /**
-     * Gestisce il caricamento del dendrogram da un file.
-     *
-     * @throws IOException se si verifica un errore di I/O
-     * @throws ClassNotFoundException se la classe non è trovata
-     */
-    private void handleLoadDendrogramFromFile() throws IOException, ClassNotFoundException {
-        String fileName = (String) in.readObject();
-        try {
-            HierachicalClusterMiner clustering = HierachicalClusterMiner.loadHierachicalClusterMiner(fileName);
-
-            if (data == null) {
-                out.writeObject("Dati non caricati");
-                return;
-            }
-
-            if (clustering.getDepth() > data.size()) {
-                out.writeObject("Numero di esempi maggiore della profondità del dendrogramma!");
-            } else {
-                out.writeObject("OK");
-                out.writeObject(clustering.toString(data));
-            }
-        } catch (IOException | InvalidDepthException e) {
-            out.writeObject(e.getMessage());
-        }
-    }
 }
 

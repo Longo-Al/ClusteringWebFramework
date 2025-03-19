@@ -31,6 +31,11 @@ public class Clusterable implements Iterable<Double> {
     }
 
     @Override
+    public String toString(){
+            return this.instance.toString();
+    }
+
+    @Override
     public Iterator<Double> iterator() {
         if (valutation == null) {
             prepareCluster();
@@ -54,4 +59,5 @@ public class Clusterable implements Iterable<Double> {
         }
         return Math.sqrt(sum);
     }
+
 }
