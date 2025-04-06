@@ -13,8 +13,6 @@ const showLoadingIndicator = () => {
     `;
 };
 
-// Funzione per creare un elemento DOM con i dati del JSON
-// Funzione per creare un elemento DOM con i dati del JSON
 const createDOMElement = (data, basePath) => {
     const container = document.createElement("div");
     container.className = "card mb-3";
@@ -47,12 +45,21 @@ const createDOMElement = (data, basePath) => {
         </small>
     `;
 
-    // Crea il pulsante per caricare i dettagli del dataset
+    // Crea il pulsante per aprire il modale
     const loadButton = document.createElement("button");
     loadButton.className = "btn btn-primary";
     loadButton.textContent = "Clusterize";
-    loadButton.onclick = () => {
-        loadDatasetDetails(basePath, data.id);
+    loadButton.setAttribute("data-bs-toggle", "modal");
+    loadButton.setAttribute("data-bs-target", "#clusteringModal");
+    loadButton.onclick = async () => {
+        document.getElementById("confirm-btn").dataset.datasetId = data.id;
+        const slider = document.getElementById("depth-slider");
+        const MaxLevel = await loadDatasetDetails(basePath,data.id)
+        slider.max = MaxLevel;
+        slider.value = MaxLevel;
+    
+        // Call the updateDepthValue function to update the displayed value
+        updateDepthValue();
     };
 
     cardBody.appendChild(title);
@@ -65,15 +72,14 @@ const createDOMElement = (data, basePath) => {
     return container;
 };
 
-
 // Funzione per caricare i dati dal server
 const loadDatasets = async (path) => {
     try {
         showLoadingIndicator(); // Mostra il pallino di caricamento
 
         // Crea l'URL della rotta basandoti sul percorso fornito
-        const url = `${path}/Dataset`;
-
+        const url = `${path}Dataset`;
+        console.log(`Fetching datasets from: ${url}`);
         // Esegui la richiesta alla rotta
         const response = await fetch(url);
         if (!response.ok) throw new Error("Errore nel caricamento dei dati");
@@ -83,7 +89,7 @@ const loadDatasets = async (path) => {
         // Svuota il contenuto del sidebar e popola con i dati
         sidebar.innerHTML = "";
         data.forEach(item => {
-            const domElement = createDOMElement(item, path);
+            const domElement = createDOMElement(item, url);
             sidebar.appendChild(domElement);
         });
 
@@ -96,17 +102,8 @@ const loadDatasets = async (path) => {
 
 const loadDatasetDetails = async (basePath, id) => {
     try {
-        // Mostra un indicatore di caricamento durante il fetch
-        sidebar.innerHTML = `
-            <div class="d-flex justify-content-center align-items-center h-100">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-            </div>
-        `;
-
         // URL dinamico per caricare il dataset specifico
-        const url = `${basePath}/Dataset/${id}`;
+        const url = `${basePath}/${id}`;
         console.log(`Fetching dataset details from: ${url}`);
 
         // Effettua la richiesta
@@ -118,36 +115,13 @@ const loadDatasetDetails = async (basePath, id) => {
             throw new Error("Errore nel caricamento dei dettagli del dataset");
         }
 
-        // Prova a leggere i dati JSON
-        const data = await response.json();
-        console.log("Dati ricevuti:", data);
+        // Prova a leggere i dati JSON (usando await)
+        const data = await response.json(); // Qui serve await!
+        return data.MaxLevel;
 
-        // Verifica che il dataset sia valido
-        if (!data || !data.name) {
-            console.error("Dati non validi ricevuti:", data);
-            throw new Error("Il dataset ricevuto non è valido");
-        }
-
-        // Mostra i dettagli del dataset
-        sidebar.innerHTML = `
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">${data.name}</h5>
-                    <p class="card-text">${data.description}</p>
-                    <p class="card-text"><strong>Size:</strong> ${data.size} bytes</p>
-                    <p class="card-text"><strong>Type:</strong> ${data.type}</p>
-                    <p class="card-text"><strong>Tags:</strong> ${data.tags || "No tags"}</p>
-                    <p class="card-text">
-                        <small class="text-muted">
-                            Created At: ${new Date(data.created_at).toLocaleString()}<br>
-                            Updated At: ${new Date(data.updated_at).toLocaleString()}
-                        </small>
-                    </p>
-                </div>
-            </div>
-        `;
     } catch (error) {
         console.error("Errore durante il caricamento dei dettagli del dataset:", error);
         sidebar.innerHTML = "<p class='text-danger'>Errore nel caricamento dei dettagli del dataset.</p>";
     }
 };
+

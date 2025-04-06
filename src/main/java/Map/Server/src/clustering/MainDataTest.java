@@ -27,12 +27,11 @@ public class MainDataTest {
     
     public static void main(String[] args) {
         try {
-            DbAccess access = new DbAccess();
-            Connection connection = access.getConnection();
+            Connection connection = DbAccess.getConnection("0.0.0.0");
              // Carica il dataset di test
             List<ClusterableItem<Example>> basic = load_test_set();
             //Lo carico su db
-            String name = "Test";
+            String name = "Alloraaa..";
             String description = "A simple use of the framework using Example clusterItem implementation";
             String item_type = "Example";
             String tags = "";
@@ -40,15 +39,14 @@ public class MainDataTest {
             PreparedStatement stmt = ToLoad.generateInsertQuery(connection);
             ResultSet sqlresult;
             Dataset downloaded = null;
-            int i;
             try {
-                i = stmt.executeUpdate();
+                stmt.executeUpdate();
             } catch (SQLException e) {
-                    System.out.println("Duplicate founded.");
+                    System.out.println("Duplicate founded. try to resolve "+e.getMessage());
                     sqlresult = Dataset.getInfobyName(connection, name);
                     sqlresult.next();
                     stmt = ToLoad.generateUpdateQuery(connection, sqlresult.getInt(1));
-                    i = stmt.executeUpdate();
+                     stmt.executeUpdate();
             }
 
             sqlresult = Dataset.getInfobyName(connection, name);
@@ -56,7 +54,6 @@ public class MainDataTest {
             sqlresult = Dataset.getbyId(connection, sqlresult.getInt(1));
             sqlresult.next();
             downloaded = Dataset.createFromResultSet(sqlresult);
-            
             
             List<? extends ClusterableItem<?>> reloaded = JsonSafeConverter.parseBlob(downloaded.getData(), downloaded.getType());
             
@@ -68,7 +65,7 @@ public class MainDataTest {
             HierachicalClusterMiner<? extends ClusterableItem<?>> miner = new HierachicalClusterMiner<>(reBasic,reBasic.size());
             ClusterDistance aver = new AverageLinkDistance();
             ClusterDistance best_fit = new SingleLinkDistance();
-            connection.close();
+            DbAccess.releaseConnection();
             miner.mine(aver);
             System.out.println("Average Test:");
             System.out.println(miner.toVerboseString());
@@ -83,15 +80,8 @@ public class MainDataTest {
             System.out.println("Problema con la conversione Json to obj;");
         } catch (ClassNotFoundException e) {
             System.out.println("La classe richiesta non è stata trovata o non può essere utilizzata;");
-        } catch (InvalidDepthException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (InvalidSizeException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (InvalidClustersNumberException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        } catch (InvalidDepthException | InvalidSizeException | InvalidClustersNumberException e) {
+            System.out.println(e.getMessage());
         }
     }
     

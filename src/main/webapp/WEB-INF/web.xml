@@ -12,7 +12,6 @@
         <servlet-name>IndexServlet</servlet-name>
         <url-pattern>/</url-pattern>
     </servlet-mapping>
-
     <servlet>
         <servlet-name>DatasetServlet</servlet-name>
         <servlet-class>Map.servlet.DatasetServlet</servlet-class>
@@ -21,7 +20,14 @@
         <servlet-name>DatasetServlet</servlet-name>
         <url-pattern>/Dataset/*</url-pattern>
     </servlet-mapping>
-
+     <servlet>
+        <servlet-name>MinerServlet</servlet-name>
+        <servlet-class>Map.servlet.MiningService</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>MinerServlet</servlet-name>
+        <url-pattern>/ClusterMiner/*</url-pattern>
+    </servlet-mapping>
     <servlet>
         <servlet-name>CSSGetter</servlet-name>
         <servlet-class>Map.servlet.CSSGetter</servlet-class>

@@ -2,7 +2,6 @@ package Map.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
 import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -20,61 +19,59 @@ import Map.Server.src.database.JsonSafeConverter;
 import Map.Server.src.database.Exception.DatabaseConnectionException;
 import Map.Server.src.database.Pojo.Dataset;
 
-import java.util.Base64;
-
+/**
+ * Servlet che gestisce le operazioni CRUD sui dataset. Permette di recuperare informazioni,
+ * aggiornare e cancellare i dataset nel database.
+ * 
+ * @author Alex Longo
+ */
 public class DatasetServlet extends HttpServlet {
-    private DbAccess dbAccess;
+    /** Connessione al database */
+    private static Connection connection;
+
+    /**
+     * Inizializza la connessione al database all'avvio del servlet.
+     * 
+     * @throws ServletException se non è possibile stabilire la connessione con il database
+     */
     @Override
     public void init() throws ServletException {
-        try {
-            dbAccess = new DbAccess();
-        } catch (DatabaseConnectionException e) {
-            throw new ServletException("Failed to initialize database connection", e);
+        super.init();
+        if (connection == null) {
+            try {
+                connection = DbAccess.getConnection();
+            } catch (DatabaseConnectionException e) {
+                throw new ServletException(e.getLocalizedMessage());
+            }
         }
     }
 
-   
-
-@Override
-protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    String pathInfo = request.getPathInfo();
-    response.setContentType("application/json");
-    try (PrintWriter out = response.getWriter()) {
-        Connection connection = dbAccess.getConnection();
-        if (pathInfo == null || pathInfo.equals("/")) {
-            // Get all datasets (without data field)
-            try (ResultSet rs = Dataset.getInfosFromDb(connection)) {
-                out.print("[");
-                boolean first = true;
-                while (rs.next()) {
-                    if (!first) out.print(",");
-                    out.print("{" +
-                            "\"id\":" + rs.getInt("id") + "," +
-                            "\"name\":\"" + rs.getString("name") + "\"," +
-                            "\"description\":\"" + rs.getString("description") + "\"," +
-                            "\"size\":" + rs.getLong("size") + "," +
-                            "\"created_at\":\"" + rs.getTimestamp("created_at") + "\"," +
-                            "\"updated_at\":\"" + rs.getTimestamp("updated_at") + "\"," +
-                            "\"type\":\"" + rs.getString("type") + "\"," +
-                            "\"tags\":\"" + rs.getString("tags") + "\"}");
-                    first = false;
-                }
-                out.print("]");
-            }
-        } else {
-            // Get dataset by ID (with data field)
-            String[] parts = pathInfo.split("/");
-            if (parts.length == 2) {
-                int id = Integer.parseInt(parts[1]);
-                try (ResultSet rs = Dataset.getbyId(connection, id)) {
-                    if (rs.next()) {
-                        byte[] dataBytes = rs.getBytes("data");
-                        // Se i dati sono codificati in base64, decodificali
-                        String dataString = new String(dataBytes, StandardCharsets.UTF_8);  // supponiamo che i dati siano UTF-8
-                        // Aggiungi la codifica base64 solo se i dati sono binari
-                        String base64Data = Base64.getEncoder().encodeToString(dataBytes); 
-
-                        // Scrivi la risposta JSON
+    /**
+     * Gestisce la richiesta GET per recuperare informazioni sui dataset.
+     * Se il path è vuoto, restituisce la lista dei dataset, altrimenti fornisce informazioni su un dataset specifico.
+     * 
+     * @param request la richiesta HTTP
+     * @param response la risposta HTTP
+     * @throws ServletException se un errore si verifica durante l'elaborazione della richiesta
+     * @throws IOException se un errore si verifica nella lettura dei dati
+     */
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String pathInfo = request.getPathInfo();
+        response.setContentType("application/json");
+    
+        try (PrintWriter out = response.getWriter()) {
+            if (pathInfo == null || pathInfo.equals("/")) {
+                try (ResultSet rs = Dataset.getInfosFromDb(connection)) {
+                    if (rs == null) {
+                        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                        out.print("{\"error\":\"Failed to retrieve datasets\"}");
+                        return;
+                    }
+                    out.print("[");
+                    boolean first = true;
+                    while (rs.next()) {
+                        if (!first) out.print(",");
                         out.print("{" +
                                 "\"id\":" + rs.getInt("id") + "," +
                                 "\"name\":\"" + rs.getString("name") + "\"," +
@@ -83,64 +80,48 @@ protected void doGet(HttpServletRequest request, HttpServletResponse response) t
                                 "\"created_at\":\"" + rs.getTimestamp("created_at") + "\"," +
                                 "\"updated_at\":\"" + rs.getTimestamp("updated_at") + "\"," +
                                 "\"type\":\"" + rs.getString("type") + "\"," +
-                                "\"data\":\"" + base64Data + "\"," +
                                 "\"tags\":\"" + rs.getString("tags") + "\"}");
-                    } else {
-                        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                        out.print("{\"error\":\"Dataset not found \"}");
+                        first = false;
                     }
+                    out.print("]");
                 }
             } else {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                out.print("{\"error\":\"Invalid request: can't parse path \"}");
+                String[] parts = pathInfo.split("/");
+                if (parts.length == 2) {
+                    int id = Integer.parseInt(parts[1]);
+                    try (ResultSet rs = Dataset.getClusterInfo(connection, id)) {
+                        if (rs == null || !rs.next()) {
+                            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                            out.print("{\"error\":\"Dataset not found\"}");
+                            return;
+                        }
+
+                        int datasetId = rs.getInt("id");
+                        int maxLevel = rs.getInt("MaxLevel");
+
+                        out.print("{" +
+                                "\"id\":" + datasetId + "," +
+                                "\"MaxLevel\":" + maxLevel + "}");
+                    }
+                } else {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    out.print("{\"error\":\"Invalid request: can't parse path\"}");
+                }
             }
-        }
-        out.close();
-    } catch (SQLException | DatabaseConnectionException | DataReadException e) {
-        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        response.getWriter().print("{\"error\":\"" + e.getMessage() + "\"}");
-    }
-}
-
-
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        try {
-            // Recupero dei parametri dalla request
-            String name = request.getParameter("name");
-            String description = request.getParameter("description");
-            String type = request.getParameter("type");
-            String tags = request.getParameter("tags");
-            byte[] data = request.getParameter("data").getBytes();
-
-            // Creazione della connessione al database
-            Connection connection = dbAccess.getConnection();
-            Blob b = JsonSafeConverter.CreateBlobfromJson(connection, data, type);
-            Dataset toupdate = new Dataset(name, description, type, b, tags);
-            PreparedStatement stmt = toupdate.generateInsertQuery(connection);
-            // Esecuzione della query
-            int rowsAffected = stmt.executeUpdate();
-
-            // Controllo se l'inserimento è riuscito
-            if (rowsAffected > 0) {
-                response.setStatus(HttpServletResponse.SC_CREATED);
-                response.getWriter().print("{\"message\":\"Dataset created successfully\"}");
-            } else {
-                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                response.getWriter().print("{\"error\":\"Failed to create dataset\"}");
-            }
-
-            // Chiusura della connessione
-            stmt.close();
-            connection.close();
-        } catch (Exception e) {
-            // Gestione degli errori
+        } catch (SQLException | DataReadException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().print("{\"error\":\"" + e.getMessage() + "\"}");
         }
     }
 
-
+    /**
+     * Gestisce la richiesta PUT per aggiornare un dataset esistente.
+     * 
+     * @param request la richiesta HTTP
+     * @param response la risposta HTTP
+     * @throws ServletException se un errore si verifica durante l'elaborazione della richiesta
+     * @throws IOException se un errore si verifica nella lettura dei dati
+     */
     @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String pathInfo = request.getPathInfo();
@@ -152,9 +133,7 @@ protected void doGet(HttpServletRequest request, HttpServletResponse response) t
                 String type = request.getParameter("type");
                 String tags = request.getParameter("tags");
                 byte[] data = request.getParameter("data").getBytes();
-                
-                // Creazione della connessione al database
-                Connection connection = dbAccess.getConnection();
+            
                 Blob b = JsonSafeConverter.CreateBlobfromJson(connection, data, type);
                 Dataset toupdate = new Dataset(name, description, type, b, tags);
                 PreparedStatement stmt = toupdate.generateUpdateQuery(connection, id);
@@ -171,8 +150,6 @@ protected void doGet(HttpServletRequest request, HttpServletResponse response) t
     
                 // Chiusura delle risorse
                 stmt.close();
-                connection.close();
-    
             } catch (Exception e) {
                 // Gestione degli errori
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -183,15 +160,22 @@ protected void doGet(HttpServletRequest request, HttpServletResponse response) t
             response.getWriter().print("{\"error\":\"Invalid request\"}");
         }
     }
-    
+
+    /**
+     * Gestisce la richiesta DELETE per eliminare un dataset esistente.
+     * 
+     * @param request la richiesta HTTP
+     * @param response la risposta HTTP
+     * @throws ServletException se un errore si verifica durante l'elaborazione della richiesta
+     * @throws IOException se un errore si verifica nella lettura dei dati
+     */
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String pathInfo = request.getPathInfo();
         if (pathInfo != null && pathInfo.split("/").length == 2) {
             try {
                 int id = Integer.parseInt(pathInfo.split("/")[1]);
-                String query = "DELETE FROM Datasets WHERE id = ?";
-                Connection connection = dbAccess.getConnection();
+                String query = "DELETE FROM Datasets WHERE id = ?";;
                 try (PreparedStatement stmt = connection.prepareStatement(query)) {
                     stmt.setInt(1, id);
                     int rows = stmt.executeUpdate();
@@ -202,7 +186,7 @@ protected void doGet(HttpServletRequest request, HttpServletResponse response) t
                         response.getWriter().print("{\"error\":\"Dataset not found\"}");
                     }
                 }
-            } catch (Exception e) {
+            } catch (IOException | NumberFormatException | SQLException e) {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 response.getWriter().print("{\"error\":\"" + e.getMessage() + "\"}");
             }
@@ -211,14 +195,4 @@ protected void doGet(HttpServletRequest request, HttpServletResponse response) t
             response.getWriter().print("{\"error\":\"Invalid request\"}");
         }
     }
-
-    @Override
-    public void destroy() {
-        try {
-            dbAccess.closeConnection();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 }
-

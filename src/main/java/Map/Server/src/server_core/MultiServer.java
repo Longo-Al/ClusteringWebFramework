@@ -5,17 +5,24 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 /**
- * Classe che gestisce il server
+ * La classe MultiServer gestisce l'avvio e la gestione del server che accetta
+ * connessioni multiple da parte di client. Utilizza il pattern Singleton per
+ * garantire che ci sia una sola istanza del server.
+ * 
+ * @author Alex Longo
  */
-public class MultiServer{
+public class MultiServer {
     /** La porta del server */
     private final int PORT;
-    /** Singleton */
+    
+    /** Riferimento all'istanza Singleton del server */
     private static MultiServer singleton = null;
+
     /**
-     * Costruttore di classe, inizializza la porta e invoca run()
-     *
-     * @param port che indica la porta alla quale connettersi
+     * Costruttore della classe MultiServer. Inizializza la porta e avvia il server
+     * invocando il metodo run().
+     * 
+     * @param port la porta sulla quale il server deve ascoltare le connessioni.
      */
     private MultiServer(int port) {
         this.PORT = port;
@@ -23,43 +30,46 @@ public class MultiServer{
     }
 
     /**
-     * Metodo che serve per creare un istanza un nuovo Server, specificando
-     * la porta in modo tale da rendere Singleton la classe Server.
-     * Crea un nuovo server solo 1 volta, quelle successive non potrò più farlo.
-     *
-     * @param port che indica la porta sulla quale avviare il server
+     * Metodo statico per creare l'istanza unica di MultiServer. Garantisce che
+     * il server venga avviato solo una volta, mantenendo l'implementazione Singleton.
+     * 
+     * @param port la porta sulla quale avviare il server.
      */
-    public static void instanceMultiServer(int port){
-        if(singleton == null)
+    public static void instanceMultiServer(int port) {
+        if (singleton == null) {
             singleton = new MultiServer(port);
+        }
     }
 
     /**
-     * Crea un oggetto istanza della classe ServerSocket che pone in attesa di
-     * richiesta di connessioni da parte del client. A ogni nuova richiesta di
-     * connessione si crea un istanza ServerOneClient sfruttando cosi il MultiThreading
+     * Avvia il server, creando un oggetto ServerSocket che ascolta le connessioni
+     * in ingresso sulla porta specificata. Ogni volta che un client si connette,
+     * viene creato un nuovo thread (ClientHandler) per gestire la connessione.
      */
     private void run() {
-        try {
-            ServerSocket s = new ServerSocket(PORT);
-            try (s) {
-                System.out.println("Started: " + s);
-                while (true) {
-                    Socket socket = s.accept();
-                    System.out.println("Connessione client: " + socket);
-
-                    try {
-                        new ServerOneClient(socket);
-                    } catch (IOException e) {
-                        System.out.println("Errore nella creazione del socket: " + socket);
-                        socket.close();
-                    }
+        try (ServerSocket serverSocket = new ServerSocket(PORT)) {
+            System.out.println("Server avviato sulla porta: " + PORT);
+            
+            // Ciclo infinito per accettare continuamente nuove connessioni
+            while (true) {
+                try {
+                    // Accetta una connessione in ingresso dal client
+                    Socket clientSocket = serverSocket.accept();
+                    System.out.println("Connessione accettata: " + clientSocket);
+                    
+                    // Crea e avvia un nuovo thread per gestire la connessione del client
+                    ClientHandler clientHandler = new ClientHandler(clientSocket);
+                    clientHandler.start();
+                } catch (IOException e) {
+                    // Gestione errori durante la gestione della connessione con il client
+                    System.out.println("Errore nella gestione della connessione con il client.");
+                    e.printStackTrace();
                 }
             }
-            // ServerSocket, serve se ci fanno un kill del thread dall'esterno
         } catch (IOException e) {
-            System.out.println("Errore...");
+            // Gestione errori durante l'avvio del server
+            System.out.println("Errore nell'avvio del server.");
+            e.printStackTrace();
         }
     }
 }
-

@@ -20,6 +20,7 @@ CREATE TABLE Datasets (
     name VARCHAR(255) NOT NULL unique,         -- Nome del dataset
     description TEXT,                          -- Descrizione opzionale del dataset
     size BIGINT,                               -- Dimensione della stringa json(in byte)
+    Maxlevel INT,  
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Data di creazione del dataset
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- Data dell'ultimo aggiornamento
     type VARCHAR(100),                           -- Classe Nativa del dataset che estende ClusterableItem(es: <Example>,<Image>,..)

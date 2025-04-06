@@ -11,11 +11,23 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+/**
+ * Servlet per la gestione dei file JavaScript richiesti dai client.
+ * La servlet recupera i file JavaScript dalla directory /js e li restituisce come risposta.
+ * 
+ * @author Alex Longo
+ */
 public class JsGetter extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
+    /** La directory base per i file JavaScript */
     private String basePath;
 
+    /**
+     * Inizializza la servlet e imposta il percorso della directory contenente i file JavaScript.
+     * 
+     * @throws ServletException se non è possibile determinare il percorso base
+     */
     @Override
     public void init() throws ServletException {
         // Inizializza il BASE_PATH relativo alla directory /scripts nella root del contesto
@@ -25,6 +37,15 @@ public class JsGetter extends HttpServlet {
         }
     }
 
+    /**
+     * Gestisce la richiesta GET per recuperare un file JavaScript dalla directory /js.
+     * Il nome del file viene estratto dal percorso della richiesta e il file viene letto e restituito come risposta.
+     * 
+     * @param req la richiesta HTTP
+     * @param resp la risposta HTTP
+     * @throws ServletException se si verifica un errore nel gestire la richiesta
+     * @throws IOException se si verifica un errore nella lettura del file
+     */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         // Recupera il nome del file dal path

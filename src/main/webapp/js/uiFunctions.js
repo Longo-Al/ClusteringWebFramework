@@ -24,9 +24,6 @@ function loadFile(files) {
     return false;
 }
 
-/**
- * Reads the json dendrogram data from the file provided in the URL parameter.
- */
 function loadFromUrl() {
     console.info(`Reading Json dendrogram data from file ${window.fileName}...`);
     d3.json(window.fileName,
@@ -45,6 +42,20 @@ function loadFromUrl() {
             return true;
         });
 }
+
+/**
+ * Processes the given JSON dendrogram data.
+ * @param   {Object}   jsonData   The JSON object representing the dendrogram data.
+ */
+function loadJson(jsonData) {
+    if (jsonData) {
+        console.info("Processing JSON dendrogram data...");
+        window.readData(jsonData);
+        return true;
+    }
+    return false;
+}
+
 
 // #endregion
 
@@ -65,10 +76,8 @@ function initUI() {
         .attr("id", "topSvg");
 
     // adds overall svg
-    window.svg = window.topSvg.append("svg:svg")
-        .attr("id", "innerSvg")
-        .attr("width", window.innerWidth || 800)  // Valori di fallback
-        .attr("height", window.innerHeight || 600);
+    window.svg = d3.select("#topSvg").append("svg:svg")
+        .attr("id", "innerSvg");
 
     // adds a rectangle as a background
     window.backgRect = window.svg.append("rect")
@@ -96,9 +105,9 @@ function initUI() {
         select.options[select.options.length] = new Option(window.colorPaletteOptions[key], key);
     }
 
-    //reads data and initializes graph
-    loadFromUrl();
+    update();
 }
+
 /**
  * Reads all dendrogram / clustering information from the given Json object.
  * @param {object}  clusterJsonObj  The Json object containing all the dendrogram / clustering information.
@@ -151,7 +160,7 @@ function readData(clusterJsonObj) {
         var zoomListener = d3.behavior.zoom()
             .scaleExtent([window.minZoom, Math.max(window.minZoom + 1, window.numClusterLeafs / window.maxZoomFactor)])
             .on("zoom", window.onZoom);
-        window.topSvg.call(zoomListener);
+        window.svg.call(zoomListener);
 
         // sets link data
         window.svg.selectAll(".link")
@@ -556,7 +565,7 @@ function updateAllLabels() {
             function (d) {
                 return window.vertLayout ? "central" : (d.children ? "alphabetic" : "middle");
             })
-        .style("font-size", Math.max(3, (98 / window.numClusterLeafs)) + "px")
+        .style("font-size", Math.max(3, (35 / window.numClusterLeafs)) + "px")
         .text(function (d) { return d.n; });
 }
 
@@ -685,5 +694,6 @@ function onZoom() {
     const dy = Math.max((1 - scale) * window.height, Math.min(0, d3.event.translate[1]));
     window.svg.attr("transform", `translate(${dx},${dy})scale(${scale})`);
 }
+
 
 // #endregion

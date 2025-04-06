@@ -14,8 +14,23 @@ import javax.servlet.http.HttpServletResponse;
 //TO INCLUDE FOR WAR
 import Map.servlet.DatasetServlet;
 
+/**
+ * Servlet per gestire le richieste alla pagina principale (index.html).
+ * Questa servlet invia il contenuto del file index.html come risposta.
+ * 
+ * @author Alex Longo
+ */
 public class indexservlet extends HttpServlet {
 
+    /**
+     * Gestisce la richiesta GET per servire il file index.html.
+     * Il file viene letto dal disco e inviato come risposta HTTP.
+     * 
+     * @param request la richiesta HTTP
+     * @param response la risposta HTTP
+     * @throws ServletException se un errore si verifica durante l'elaborazione della richiesta
+     * @throws IOException se un errore si verifica nella lettura o scrittura del file
+     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         // Imposta il tipo di contenuto della risposta come HTML

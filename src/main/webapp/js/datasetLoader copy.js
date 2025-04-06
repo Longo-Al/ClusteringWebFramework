@@ -61,7 +61,7 @@
 
             // Ottieni il path corrente e crea l'URL della rotta
             const currentPath = window.location.pathname;
-            const url = `${path}/Dataset`;
+            const url = `${path}Dataset`;
 
             // Esegui la richiesta alla rotta
             const response = await fetch(url);
