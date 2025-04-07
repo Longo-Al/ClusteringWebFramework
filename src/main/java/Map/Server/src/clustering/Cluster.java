@@ -4,134 +4,198 @@ import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.UUID;
 
-import Map.Server.src.data.Data;
-
+import Map.Server.src.clustering.Interface.ClusterableItem;
 
 /**
- * Classe Cluster
- * modella un cluster come la collezione delle posizioni occupate
- * dagli esempi raggruppati nel Cluster nel vettore data dell’oggetto
- * che modella il dataset su cui il clustering è calcolato(istanza di Data)
- *
- * @author Team MAP Que Nada
+ * La classe {@code Cluster} modella un cluster come una collezione di UUID
+ * che identificano elementi raggruppati insieme secondo un algoritmo di clustering.
+ * 
+ * Un {@code Cluster} può essere semplice (contenere un solo elemento) oppure
+ * essere il risultato della fusione di due altri cluster.
+ * 
+ * Implementa {@link Iterable}, {@link Cloneable}, {@link Serializable} e {@link Comparable}.
+ * 
+ * @author Longo Alex
  */
-public class Cluster implements Iterable<Integer>, Cloneable, Serializable {
-	/**
-	 * Set di interi che rappresenta gli indici degli esempi raggruppati nel cluster
-	 */
-	private Set<Integer> clusteredData =new TreeSet<>();
+public class Cluster implements Iterable<UUID>, Cloneable, Serializable, Comparable<Cluster> {
+    
+    private Set<UUID> clusteredData = new TreeSet<>();
+    private final double distance;
+    private Cluster parent1;
+    private Cluster parent2;
 
-	/**
-	 * Metodo addData
-	 * aggiunge l'indice di posizione id al cluster
-	 *
-	 * @param id indice da aggiungere al cluster
-	 */
-	void addData(int id){
+    /**
+     * Costruttore di default. Crea un cluster vuoto con distanza zero.
+     */
+    public Cluster() {
+        this.distance = 0;
+    }
+
+    /**
+     * Costruttore per la creazione di un nuovo cluster
+     * come unione di due cluster esistenti.
+     *
+     * @param o1 Primo cluster genitore
+     * @param o2 Secondo cluster genitore
+     * @param d  Distanza tra i due cluster
+     */
+    public Cluster(Cluster o1, Cluster o2, Double d) {
+        this.parent1 = o1;
+        this.parent2 = o2;
+        this.distance = d;
+        this.clusteredData.addAll(o1.clusteredData);
+        this.clusteredData.addAll(o2.clusteredData);
+    }
+
+    /**
+     * Aggiunge un elemento identificato da {@code id} al cluster.
+     *
+     * @param id UUID dell'elemento da aggiungere
+     */
+    void addData(UUID id) {
         clusteredData.add(id);
-	}
+    }
 
-	/**
-	 * Metodo getSize
-	 * restituisce la dimensione del cluster
-	 *
-	 * @return dimensione del cluster
-	 */
-	public int getSize() {
-		return clusteredData.size();
-	}
+    /**
+     * Restituisce un iteratore sugli elementi del cluster.
+     *
+     * @return iteratore di {@link UUID}
+     */
+    @Override
+    public Iterator<UUID> iterator() {
+        return clusteredData.iterator();
+    }
 
-	/**
-	 * Metodo iterator
-	 * restituisce un iterator per scorrere gli elementi del cluster
-	 *
-	 * @return clusteredData.iterator() iterator per scorrere gli elementi del cluster
-	 */
-	public Iterator<Integer> iterator() {
-		return clusteredData.iterator();
-	}
+    /**
+     * Crea una copia profonda del cluster.
+     *
+     * @return una nuova istanza di {@code Cluster} contenente gli stessi dati
+     * @throws CloneNotSupportedException se il clone fallisce
+     */
+    @Override
+    public Cluster clone() throws CloneNotSupportedException {
+        Cluster clone = (Cluster) super.clone();
+        clone.clusteredData = new TreeSet<>(this.clusteredData);
+        clone.parent1 = this.parent1;
+        clone.parent2 = this.parent2;
+        return clone;
+    }
 
-	/**
-	 * metodo clone
-	 * crea una copia del cluster
-	 *
-	 * @return copia del cluster
-	 */
-	@Override
-	public Cluster clone() throws CloneNotSupportedException {
-		Cluster clone;
-		try {
-			clone = (Cluster) super.clone();
-            //noinspection unchecked
-            clone.clusteredData = (Set<Integer>) ((TreeSet<Integer>) this.clusteredData).clone();
-		} catch (CloneNotSupportedException e) {
-			throw new CloneNotSupportedException("Errore nella clonazione!");
-		}
+    /**
+     * Unisce il cluster corrente con un altro cluster, producendo un nuovo cluster.
+     *
+     * @param c Cluster da unire
+     * @param d Distanza associata alla fusione
+     * @return Nuovo cluster risultante dalla fusione
+     */
+    Cluster mergeCluster(Cluster c, Double d) {
+        return new Cluster(this, c, d);
+    }
 
-		return clone;
-	}
+    /**
+     * Restituisce una rappresentazione testuale del cluster,
+     * contenente gli UUID degli elementi.
+     *
+     * @return stringa rappresentante il cluster
+     */
+    @Override
+    public String toString() {
+        return clusteredData.toString();
+    }
 
-	/**
-	 * Metodo mergeCluster
-	 * crea un nuovo cluster che è la fusione del cluster corrente e del cluster c
-	 *
-	 * @param c cluster da unire al cluster corrente
-	 * @return newC cluster che è la fusione del cluster corrente e del cluster c
-	 */
-	Cluster mergeCluster(Cluster c) {
-		Cluster newC = new Cluster();
-		Iterator<Integer> it1 = this.iterator();
-		Iterator<Integer> it2 = c.iterator();
+    /**
+     * Restituisce una rappresentazione testuale dettagliata del cluster,
+     * usando il dataset per mostrare i dati associati agli UUID.
+     *
+     * @param data Dataset da cui ottenere la rappresentazione degli elementi
+     * @return stringa dettagliata del cluster
+     */
+    public String toString(ClusterableCollection<? extends ClusterableItem<?>> data) {
+        StringBuilder str = new StringBuilder();
+        for (UUID clusteredDatum : clusteredData) {
+            str.append("[").append(data.getClusterable(clusteredDatum).toString()).append("]");
+        }
+        return str.toString();
+    }
 
-		while (it1.hasNext()) {
-			newC.addData(it1.next());
-		}
-		while (it2.hasNext()) {
-			newC.addData(it2.next());
-		}
+    /**
+     * Restituisce il numero di elementi contenuti nel cluster.
+     *
+     * @return dimensione del cluster
+     */
+    public int getSize() {
+        return clusteredData.size();
+    }
 
-		return newC;
-	}
+    /**
+     * Restituisce la distanza associata alla fusione che ha creato questo cluster.
+     *
+     * @return distanza
+     */
+    public double getDistance() {
+        return distance;
+    }
 
+    /**
+     * Restituisce il primo cluster genitore.
+     *
+     * @return primo genitore
+     */
+    public Cluster getParent1() {
+        return parent1;
+    }
 
-	/**
-	 * Metodo toString
-	 * restituisce una stringa contenente gli indici degli esempi raggruppati nel cluster
-	 *
-	 * @return str stringa contenente gli indici degli esempi raggruppati nel cluster
-	 */
-	public String toString() {
-		StringBuilder str = new StringBuilder();
-		Iterator<Integer> it = this.iterator();
+    /**
+     * Restituisce il secondo cluster genitore.
+     *
+     * @return secondo genitore
+     */
+    public Cluster getParent2() {
+        return parent2;
+    }
 
-		if (it.hasNext())
-			str.append(it.next());
+    /**
+     * Restituisce l'insieme degli UUID raggruppati in questo cluster.
+     *
+     * @return insieme di UUID
+     */
+    public Set<UUID> getClusteredData() {
+        return clusteredData;
+    }
 
-		while (it.hasNext())
-			str.append(",").append(it.next());
+    /**
+     * Restituisce una rappresentazione degli UUID raggruppati
+     * in forma di stringa, con parentesi tonde.
+     *
+     * @return stringa con UUID tra parentesi tonde
+     */
+    public String getClusteredDataString() {
+        return clusteredData.toString().replace("[", "(").replace("]", ")");
+    }
 
-		return str.toString();
-	}
+    /**
+     * Confronta questo cluster con un altro.
+     * Il confronto è effettuato in base alla distanza,
+     * poi alla dimensione del cluster,
+     * e infine all'hashCode per garantire un ordinamento stabile.
+     *
+     * @param other altro cluster da confrontare
+     * @return valore negativo, zero o positivo a seconda dell'ordinamento
+     */
+    @Override
+    public int compareTo(Cluster other) {
+        int distanceComparison = Double.compare(this.distance, other.distance);
+        if (distanceComparison != 0) {
+            return distanceComparison;
+        }
 
-	/**
-	 * Metodo toString
-	 * restituisce una stringa contenente gli esempi raggruppati nel cluster
-	 *
-	 * @param data oggetto di classe Data che modella il dataset su cui il clustering è calcolato
-	 * @return str stringa contenente gli esempi raggruppati nel cluster
-	 */
-	public String toString(Data data) {
-		StringBuilder str = new StringBuilder();
+        int sizeComparison = Integer.compare(this.getSize(), other.getSize());
+        if (sizeComparison != 0) {
+            return sizeComparison;
+        }
 
-        for (Integer clusteredDatum : clusteredData)
-            str.append("<[").append(data.getExample(clusteredDatum)).append("]>");
-
-		return str.toString();
-	}
-
-
-
-
-
+        return Integer.compare(this.hashCode(), other.hashCode());
+    }
 }

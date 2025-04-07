@@ -1,81 +1,134 @@
 package Map.Server.src.clustering;
 
-import java.io.Serializable;
-
-import Map.Server.src.data.Data;
+import java.util.HashMap;
+import Map.Server.src.clustering.Exceptions.InvalidDepthException;
+import Map.Server.src.clustering.Interface.ClusterableItem;
 
 /**
- * Classe Dendrogram
- * Modella un dendrogramma
+ * Classe che rappresenta un dendrogramma, un'alberatura gerarchica che modella la struttura
+ * dei cluster a diversi livelli di profondità.
+ * Ogni livello contiene un insieme di cluster che rappresentano una fase di fusione dei dati.
  *
- * @author Team MAP Que Nada
+ * @author Alex Longo
  */
-class Dendrogram implements Serializable {
-    /** array di ClusterSet */
-    private final ClusterSet[] tree; //modella il dendrogramma
+public class Dendrogram extends HashMap<Integer, ClusterSet> {
+
+    /** Profondità massima del dendrogramma */
+    private final int MaxDepth;
+
+    /** Flag che indica se il dendrogramma è completo o meno */
+    private boolean isComplete;
 
     /**
-     * Costruttore
-     * @param depth profondità del dendrogramma
+     * Restituisce se il dendrogramma è completo o meno.
+     *
+     * @return {@code true} se il dendrogramma è completo, {@code false} altrimenti.
+     */
+    public boolean isComplete() {
+        return this.isComplete;
+    }
+
+    /**
+     * Imposta lo stato di completezza del dendrogramma.
+     *
+     * @param isComplete stato di completezza da impostare.
+     */
+    private void setComplete(boolean isComplete) {
+        this.isComplete = isComplete;
+    }
+
+    /**
+     * Restituisce il risultato finale del dendrogramma, ovvero l'insieme di cluster all'ultima profondità
+     * se il dendrogramma è completo.
+     *
+     * @return il cluster finale all'ultima profondità, o {@code null} se non è completo.
+     */
+    public ClusterSet getResult() {
+        if (isComplete) {
+            return this.get(this.MaxDepth - 1);
+        }
+        return null;
+    }
+
+    /**
+     * Costruttore che inizializza il dendrogramma con una profondità specificata.
+     *
+     * @param depth profondità massima del dendrogramma.
+     * @throws InvalidDepthException se la profondità è inferiore o uguale a zero.
      */
     Dendrogram(int depth) throws InvalidDepthException {
+        super();
         if (depth <= 0) {
             throw new InvalidDepthException("Profondità non valida!\n");
         }
-        tree=new ClusterSet[depth];
+        this.MaxDepth = depth;
+        setComplete(false);
     }
 
     /**
-     * Metodo getClusterSet
-     * Inserisce il cluster set c al livello level di tree
-     * @param level livello del dendrogramma in cui inserire il cluster set
+     * Aggiunge un livello di cluster nel dendrogramma. Se il numero di livelli raggiunge la profondità massima,
+     * il dendrogramma viene marcato come completo.
+     *
+     * @param key livello del dendrogramma da inserire.
+     * @param value insieme di cluster da associare al livello.
+     * @return il precedente insieme di cluster associato al livello, o {@code null} se non esisteva.
      */
-    void setClusterSet(ClusterSet c, int level){
-        tree[level]=c;
+    @Override
+    public ClusterSet put(Integer key, ClusterSet value) {
+        ClusterSet output = null;
+        if (this.size() < MaxDepth) {
+            output = super.put(key, value);
+            if (this.size() == MaxDepth) {
+                setComplete(true);
+                return value;
+            }
+        }
+        return output;
     }
 
     /**
-     * Metodo getClusterSet
-     * Restituisce il cluster set al livello level di tree
-     * @param level livello del dendrogramma da restituire
-     * @return il cluster set al livello level di tree
-     */
-    ClusterSet getClusterSet(int level) {
-        return tree[level];
-    }
-
-    /**
-     * Metodo getDepth
-     * Restituisce la profondità del dendrogramma
-     * @return la profondità del dendrogramma
+     * Restituisce la profondità corrente del dendrogramma.
+     *
+     * @return la profondità corrente del dendrogramma.
      */
     int getDepth() {
-        return tree.length;
+        return this.size();
     }
 
     /**
-     * Metodo toString
-     * Restituisce una rappresentazione testuale del dendrogramma
-     * @return una rappresentazione testuale del dendrogramma
+     * Restituisce la profondità massima del dendrogramma.
+     *
+     * @return la profondità massima del dendrogramma.
      */
-    public String toString(){
-        StringBuilder v= new StringBuilder();
-        for (int i=0;i<tree.length;i++)
-            v.append("level").append(i).append(":\n").append(tree[i]).append("\n");
+    public int getMaxDepth() {
+        return MaxDepth;
+    }
+
+    /**
+     * Restituisce una rappresentazione testuale del dendrogramma, visualizzando ogni livello e il relativo insieme di cluster.
+     *
+     * @return una stringa che rappresenta l'intero dendrogramma.
+     */
+    public String toString() {
+        StringBuilder v = new StringBuilder();
+        for (Integer k : this.keySet()) {
+            v.append("level").append(k.intValue() + 1).append(":\n").append(this.get(k)).append("\n");
+        }
         return v.toString();
     }
 
     /**
-     * Metodo toString
-     * Restituisce una rappresentazione testuale del dendrogramma
-     * @param data dataset di esempi
-     * @return una rappresentazione testuale del dendrogramma
+     * Restituisce una rappresentazione testuale del dendrogramma, visualizzando ogni livello e il relativo insieme di cluster,
+     * utilizzando il dataset fornito.
+     *
+     * @param data il dataset di esempio su cui il clustering è stato effettuato.
+     * @return una stringa che rappresenta l'intero dendrogramma, utilizzando il dataset.
      */
-    public String toString(Data data) {
-        StringBuilder v= new StringBuilder();
-        for (int i=0;i<tree.length;i++)
-            v.append("level").append(i).append(":\n").append(tree[i].toString(data)).append("\n");
+    public String toString(ClusterableCollection<? extends ClusterableItem<?>> data) {
+        StringBuilder v = new StringBuilder();
+        for (Integer k : this.keySet()) {
+            v.append("level").append(k.intValue() + 1).append(":\n").append(this.get(k).toString(data)).append("\n");
+        }
         return v.toString();
     }
-
 }

@@ -1,0 +1,139 @@
+﻿
+/* Definizione dei font */
+@font-face {
+    font-family: 'Poppins';  
+    src: url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap");
+    font-weight: normal;  
+}
+
+@font-face {
+    font-family: Candara;  
+    src: local('Candara'), url("fonts/Candara/Candara.ttf") format('truetype');  
+    font-weight: normal;  
+}
+
+/* Global rules */
+* {
+    font-size: 16px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: normal;
+    color: #333;
+    fill: #333;
+    stroke: none;
+}
+
+.options-box-value,
+.options-title,
+.options-box,
+.options-select,
+.options-select option,
+.chkbox-box,
+.jscolor {
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+}
+
+table {
+    border: none;
+    border-collapse: collapse;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+table td {
+    border: 1px solid #ccc;
+    vertical-align: top;
+    padding: 5px;
+}
+
+/* Separazione del container dalla tabella con le opzioni */
+#container {
+    width: inherit;
+    height: inherit;
+    margin: 0 auto;
+    display: block;
+}
+
+#options-panel {
+    width: 350px;
+    margin: 20px auto;
+}
+
+/* Stili delle opzioni laterali */
+.options-box-value { float: right; }
+.options-select {
+    background: #f0f0f0;
+    border: 1px solid #aaa;
+    width: 140px;
+    font-size: 14px;
+    font-style: italic;
+    border-radius: 4px;
+    padding: 4px;
+}
+
+.options-title {
+    font-weight: bold;
+    text-align: left;
+    font-size: larger;
+}
+
+.chkbox-box {
+    text-align: left;
+}
+
+/* Custom checkbox */
+input[type="checkbox"] {
+    display: none;
+}
+
+input[type="checkbox"] + label {
+    background-color: #f0f0f0;
+    border: 1px solid #aaa;
+    display: inline-block;
+    position: relative;
+    border-radius: 4px;
+    width: 15px;
+    height: 15px;
+}
+
+input[type="checkbox"]:checked + label {
+    background-color: #444;
+    color: white;
+}
+
+/* Custom button */
+input[type=button] {
+    font: 16px 'Poppins', sans-serif;
+    width: 140px;
+    border: 1px solid #aaa;
+    color: #000;
+    background: #e6e6e6;
+    cursor: pointer;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+input[type=button]:hover {
+    background: #444;
+    color: white;
+}
+
+/* D3 Tree styles */
+.node { cursor: pointer; }
+
+.node circle {
+    fill: #fff;
+    stroke-width: 1.5px;
+    stroke: #333;
+}
+
+.node text {
+    font-family: 'Poppins', sans-serif;
+    fill: #333;
+}
+
+.link {
+    fill: none;
+    stroke-width: 1.5px;
+    stroke: #999;
+}

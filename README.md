@@ -1,149 +1,124 @@
-﻿# Esercitazione 1: Classi, Aggregazione, Interfacce
+﻿## 📊 Hierarchy explanation
 
-## Task 1: Definizione di Classi e Metodi
+Le principali cartelle di questo progetto sono:
 
-### Classe `Example`
+- **Client**  
+  Contiene un main da chiamare per connettersi al server TCP del server.
 
-Questa classe modella una entità esempio, intesa come vettore di valori reali.
+- **Server**  
+  Contiene tutti i moduli necessari per il clustering.
 
-**Attributi**
+- **Servlet**  
+  Integra tutte le servlet utili per il frontend.
 
-- `Double[] example;` // Vettore di valori reali
+## 🚀 Avvio del programma
 
-**Costruttore**
+### Requisiti
 
-- `Example(int length)`
-  - **Input:** `length` - dimensione dell'esempio.
-  - **Comportamento:** Inizializza `example` come vettore di dimensione `length`.
+- [Java 21](https://www.oracle.com/java/technologies/javase/jdk21-archive-downloads.html)
+- [Docker](https://www.docker.com/)
+- [Docker Compose](https://docs.docker.com/compose/)
 
-**Metodi**
 
-- `void set(int index, Double v)`
-  - **Input:**
-    - `index` - Posizione del valore.
-    - `v` - Valore da inserire.
-  - **Comportamento:** Modifica `example` inserendo `v` in posizione `index`.
+## ⚠️ Importante: Esegui lo script SQL
 
-- `Double get(int index)`
-  - **Input:** `index` - Posizione di `example`.
-  - **Output:** Valore memorizzato in `example[index]`.
-  - **Comportamento:** Restituisce `example[index]`.
+Per garantire che l'applicazione funzioni correttamente, è necessario eseguire lo script SQL presente nella cartella `docker-config`, sul proprio database. Questo script è essenziale per configurare il database e prepararlo per l'interazione con l'applicazione.\
+>**In modalita full-feature il database si configurerà da solo.**
 
-- `double distance(Example newE)`
-  - **Input:** `newE` - Istanza di `Example`.
-  - **Output:** Calcola la distanza euclidea tra `this.example` e `newE.example`.
-  - **Comportamento:** Restituisce il valore calcolato.
+Il programma può essere avviato in due modalità:
 
-- `public String toString()`
-  - **Output:** La stringa che rappresenta il contenuto di `example`.
-  - **Comportamento:** Restituisce la stringa.
+### Modalità Full-Feature (con Docker e Tomcat)
 
-### Classe `Data`
+1. **Docker**: Per avviare il programma in modalità full-feature, è possibile utilizzare Docker. Assicurati di avere Docker installato e configurato correttamente sulla tua macchina.
+   
+2. **Tomcat**: Il frontend del progetto è integrato con Tomcat. Una volta avviato Docker, il server Tomcat si occuperà di gestire il lato frontend, mentre il backend sarà attivo e pronto per gestire le richieste.
 
-Questa classe aggrega la classe `Example`.
+   Seguendo questi passaggi, puoi avviare l'intero sistema in modalità completa con Docker e Tomcat.
 
-**Attributi**
+### Modalità Shell
+1. **MainDataTest**: presupponendo che il Db sia online e correttamente configurato secondo quanto detto sopra, è possibile avviare questo modulo per caricare il primo dataset nel DB, i successivi potranno essere caricati tramite il client.** A patto che sia in funzione e il server TCP avviato.** 
 
-- `Example[] data;` // Rappresenta il dataset
-- `int numberOfExamples;` // Numero di esempi nel dataset
+2. **Server**: avvia il programma inizialmente nel package `Server`. Per farlo, esegui il main presente in questo package per avviare il server.
+   
+3. **Client**: Successivamente, avvia il main nella classe `PassiveClient`, che si trova nel package `Client`. Questo avvierà la connessione al server TCP e permetterà l'interazione tra i moduli.
 
-**Costruttore**
+Queste due modalità ti permettono di scegliere come eseguire il programma a seconda delle tue esigenze e configurazioni.
 
-- `Data()`
-  - **Comportamento:** Avvalora un oggetto `data` predefinito (fornito dal docente).
+## 🚀 Avvio dell'applicazione in modalità Full-Feature
 
-**Metodi**
+Per avviare l'applicazione in modalità *full-feature*, utilizziamo Docker per il backend e Tomcat per il frontend. Segui i passaggi sottostanti per eseguire il programma.
 
-- `int getNumberOfExamples()`
-  - **Output:** Numero di esempi memorizzati in `data`.
-  - **Comportamento:** Restituisce `numberOfExamples`.
+### Prerequisiti
+Assicurati di avere i seguenti strumenti installati e configurati:
+- **Docker**: Necessario per eseguire il container del backend e del frontend.
+- **Gradle**: Per la gestione del build del progetto.
 
-- `Example getExample(int exampleIndex)`
-  - **Input:** `exampleIndex` - Indice di un esempio memorizzato in `data`.
-  - **Output:** L'esempio memorizzato in `data[exampleIndex]`.
-  - **Comportamento:** Restituisce `data[exampleIndex]`.
+### Passaggi per avviare l'applicazione
 
-- `double[][] distance()`
-  - **Output:** Matrice triangolare superiore delle distanze Euclidee calcolate tra gli esempi memorizzati in `data`.
-  - **Comportamento:** Restituisce la matrice triangolare superiore delle distanze.
+1. **Posizionati nella cartella principale del progetto**.
 
-- `public String toString()`
-  - **Output:** Stringa che modella lo stato dell'oggetto.
-  - **Comportamento:** Crea una stringa in cui memorizza gli esempi memorizzati nell'attributo `data`, opportunamente enumerati. Restituisce tale stringa.
+2. **Costruisci il progetto e crea il file WAR**:
+   - Esegui i seguenti comandi per costruire il progetto e generare il file WAR per il deploy su Tomcat.
 
-### Utilizzo del Metodo Main
+#### Ambiente Bash (Linux/macOS)
 
-Si usi il metodo main in `Data` fornito dal docente per ottenere il seguente output:
-makefile:
+```bash
+# Costruisci il progetto
+./gradlew build
 
-0:[1.0,2.0,0.0] 1:[0.0,1.0,-1.0] 2:[1.0,3.0,5.0] 3:[1.0,3.0,4.0] 4:[2.0,2.0,0.0]
+# Esegui il task per generare il file WAR
+./gradlew task war
 
-Distance matrix:
-0.0 3.0 26.0 17.0 1.0
-0.0 0.0 41.0 30.0 6.0
-0.0 0.0 0.0 1.0 27.0
-0.0 0.0 0.0 0.0 18.0
-0.0 0.0 0.0 0.0 0.0
+# Avvia Docker e i container necessari
+docker-compose up
+```
 
-### Interfaccia `ClusterDistance` e Classi Correlate
+#### Ambiente Windows
 
-- `Cluster`: Modella un cluster come la collezione delle posizioni occupate dagli esempi raggruppati nel cluster nel vettore `data` dell'oggetto che modella il dataset su cui il clustering è calcolato (istanza di `Data`).
-- `SingleLinkDistance`: Implementa l'interfaccia `ClusterDistance`.
-- `AverageLinkDistance`: Implementa l'interfaccia `ClusterDistance` e implementa la distanza average-link tra cluster.
+```bash
+# Costruisci il progetto
+./gradlew.bat build
 
-### Classe `ClusterSet`
+# Esegui il task per generare il file WAR
+./gradlew.bat task war
 
-Modella un insieme di cluster.
+# Avvia Docker e i container necessari
+docker-compose up
 
-**Metodo Aggiunto**
+```
+## 🌐 Accesso al Frontend
 
-- `ClusterSet mergeClosestClusters(ClusterDistance distance, Data data)`
-  - **Input:**
-    - `distance` - Oggetto per il calcolo della distanza tra cluster.
-    - `data` - Oggetto istanza che rappresenta il dataset.
-  - **Output:** Nuova istanza di `ClusterSet`.
-  - **Comportamento:** Determina la coppia di cluster più simili usando `distance` e li fonde in un unico cluster; crea una nuova istanza di `ClusterSet` che contiene tutti i cluster dell'oggetto this a meno dei due cluster fusi.
+Se il programma è stato avviato correttamente, puoi accedere al **frontend** dell'applicazione nel tuo browser all'indirizzo:
 
-### Classe `Dendrogram`
+[http://localhost:8080/clusteringwebapp/](http://localhost:8080/clusteringwebapp/)
 
-Contiene:
+### Cosa aspettarsi:
 
-**Attributi**
+Una volta che l'applicazione è in esecuzione, puoi aprire il browser e navigare all'URL sopra indicato. Il frontend sarà visibile e interattivo. 
 
-- `private ClusterSet[] tree;` // Modella il dendrogramma
+### Screenshot del Frontend
 
-**Costruttore**
+Qui di seguito un esempio dell'interfaccia che dovresti visualizzare:
 
-- `Dendrogram(int depth)`
-  - **Input:** `depth` - Profondità del dendrogramma.
-  - **Comportamento:** Crea un vettore di dimensione `depth` con cui inizializza `tree`.
+![Screenshot del frontend](images/frontend-preview.png)
 
-**Metodi**
+> **Nota**: Assicurati che il container DB e il container Docker siano in esecuzione per poter accedere al frontend correttamente.
 
-- `void setClusterSet(ClusterSet c, int level)`
-  - **Comportamento:** Memorizza `c` nella posizione `level` di `tree`.
+# Note Finali
 
-- `ClusterSet getClusterSet(int level)`
-  - **Comportamento:** Restituisce `tree[level]`.
+Nonostante il servizio di clustering sviluppato sia stato progettato per essere **generico** e **input-proof**, si evidenzia che il progetto **non è ancora pronto per una fase di produzione**.
 
-- `int getDepth()`
-  - **Comportamento:** Restituisce la profondità del dendrogramma.
+In particolare:
+- **Vulnerabilità CSRF**: Il sistema è attualmente esposto a possibili attacchi di tipo Cross-Site Request Forgery, in quanto mancano meccanismi di sanitizzazione dei campi che verranno mostrati nel frontend.
+- **Vulnerabilità SQL Injection**: Non sono stati ancora implementati sufficienti livelli di sanitizzazione e parametrizzazione delle query, rendendo il sistema vulnerabile ad attacchi di tipo SQL Injection.
 
-- `public String toString()`
-  - **Comportamento:** Restituisce una rappresentazione stringa del dendrogramma.
+Si raccomanda, pertanto, un'approfondita fase di hardening e testing di sicurezza prima di qualsiasi utilizzo reale o distribuzione in ambienti di produzione.
 
-- `public String toString(Data data)`
-  - **Comportamento:** Restituisce una rappresentazione stringa del dendrogramma utilizzando i dati del dataset.
+---
 
-### Classe `HierarchicalClusterMiner`
+# Ringraziamenti
 
-Implementa il metodo per eseguire il clustering gerarchico.
+Un sentito ringraziamento a **Pedro Pereira** per aver sviluppato il componente JavaScript di **conversione da JSON a SVG**, fondamentale per la **visualizzazione dei dendrogrammi**.
 
-**Metodo**
+Il suo contributo ha permesso una rappresentazione grafica chiara e funzionale dei risultati del clustering.
 
-- `void mine(Data data, ClusterDistance distance)`
-  - **Comportamento:** Crea il livello base del dendrogramma che rappresenta ogni esempio in un cluster separato; per tutti i livelli successivi del dendrogramma costruisce l'istanza di `ClusterSet` che realizza la fusione dei due cluster più vicini.
-
-### Utilizzo della Classe `MainTest`
-
-Usare la classe `MainTest` fornita dal docente per calcolare l'output mostrato nel file `output.txt`.

@@ -1,138 +1,126 @@
 package Map.Server.src.clustering;
 
-import java.io.Serializable;
-
-import Map.Server.src.data.Data;
-import Map.Server.src.data.InvalidSizeException;
-import Map.Server.src.distance.ClusterDistance;
+import java.util.TreeSet;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import Map.Server.src.clustering.Exceptions.InvalidClustersNumberException;
+import Map.Server.src.clustering.Exceptions.InvalidSizeException;
+import Map.Server.src.clustering.Interface.ClusterableItem;
+import Map.Server.src.clustering.Serialization.ClusterSerializer;
+import Map.Server.src.clustering.Serialization.ClusterSetSerializer;
+import Map.Server.src.clustering.distance.ClusterDistance;
 
 /**
- * classe ClusterSet
- * Implementa un insieme di cluster
+ * Classe che rappresenta un insieme di cluster, 
+ * implementata come una struttura {@link TreeSet} di oggetti {@link Cluster}.
+ * Consente operazioni di fusione dei cluster, visualizzazione dei dati e serializzazione in JSON.
  *
  * @author Team MAP Que Nada
  */
-class ClusterSet implements Serializable {
-	/** Insieme di cluster */
-	private final Cluster[] C;
-	/** Indice dell'ultimo cluster */
-	private int lastClusterIndex=0;
+public class ClusterSet extends TreeSet<Cluster> {
 
-	/**
-	 * Costruttore
-	 * crea un'istanza di classe ClusterSet di dimensione k
-	 *
-	 * @param k dimensione dell'insieme di cluster
-	 */
-	ClusterSet(int k){
-		C=new Cluster[k];
-	}
+    /**
+     * Costruttore di default che crea un insieme vuoto di cluster.
+     */
+    ClusterSet() {
+        super();
+    }
 
-	/**
-	 * Metodo add
-	 * aggiunge il cluster c all'insieme di cluster
-	 * controlla che il cluster non sia già presente nell'insieme
-	 *
-	 * @param c cluster da aggiungere all'insieme
-	 */
-	void add(Cluster c){
-		for(int j=0;j<lastClusterIndex;j++)
-			if(c==C[j]) // to avoid duplicates
-				return;
-		C[lastClusterIndex]=c;
-		lastClusterIndex++;
-	}
+    /**
+     * Fonde i due cluster più vicini all'interno di questo insieme, in base alla distanza
+     * calcolata da un oggetto {@link ClusterDistance}.
+     *
+     * @param distance oggetto che calcola la distanza tra i cluster.
+     * @param data la collezione di clusterabili su cui calcolare la distanza.
+     * @return un nuovo {@link ClusterSet} con i cluster uniti.
+     * @throws InvalidSizeException se le dimensioni dei cluster non coincidono.
+     * @throws InvalidClustersNumberException se non ci sono abbastanza cluster da fondere.
+     */
+    public final ClusterSet mergeClosestClusters(ClusterDistance distance, ClusterableCollection<? extends ClusterableItem<?>> data) throws InvalidSizeException, InvalidClustersNumberException {
+        if (this.size() <= 1)
+            throw new InvalidClustersNumberException("Non ci sono abbastanza cluster da fondere");
 
-	/**
-	 * Metodo get
-	 * restituisce il cluster in posizione i
-	 *
-	 * @param i indice del cluster da restituire
-	 * @return cluster in posizione i
-	 */
-	Cluster get(int i){
-		return C[i];
-	}
+        double minD = Double.MAX_VALUE;
+        Cluster cluster1 = null;
+        Cluster cluster2 = null;
 
-	/**
-	 * Metodo mergeClosestClusters
-	 * restituisce un nuovo insieme di cluster che è la fusione dei due cluster più vicini
-	 *
-	 * @param distance interfaccia di calcolo della distanza tra due cluster
-	 * @param data dataset
-	 * @return insieme di cluster con i due cluster più vicini fusi
-	 */
-	ClusterSet mergeClosestClusters(ClusterDistance distance, Data data) throws InvalidSizeException, InvalidClustersNumberException {
-		if ( lastClusterIndex <= 1)
-			throw new InvalidClustersNumberException("Non ci sono abbastanza cluster da fondere");
-
-		double minD = Double.MAX_VALUE;
-		Cluster cluster1 = null;
-		Cluster cluster2 = null;
-
-		for (int i = 0; i < this.C.length; i++) {
-			Cluster c1 = get(i);
-			for(int j = i+1; j<this.C.length; j++){
-				Cluster c2 = get(j);
-				double d;
+        for (Cluster c1 : this) {
+            for (Cluster c2 : this.tailSet(c1, false)) { // Considera solo i successivi per evitare doppi confronti
                 try {
-					d = distance.distance(c1, c2, data);
-					if (d < minD) {
-						minD = d;
-						cluster1 = c1;
-						cluster2 = c2;
-					}
-				} catch (InvalidSizeException e) {
-					j = this.C.length;
-					i = this.C.length;
-					throw e;
-				}
-			}
-		}
-		Cluster mergedCluster = cluster1.mergeCluster(cluster2);
-		ClusterSet finalClusterSet = new ClusterSet(this.C.length-1);
-		for(int i=0; i<this.C.length; i++){
-			Cluster c = get(i);
-			if(c!=cluster1) {
-				if (c != cluster2)
-					finalClusterSet.add(c);
-			}
-			else
-				finalClusterSet.add(mergedCluster);
-		}
+                    double d = distance.distance(c1, c2, data);
+                    if (d < minD) {
+                        minD = d;
+                        cluster1 = c1;
+                        cluster2 = c2;
+                    }
+                } catch (InvalidSizeException e) {
+                    throw e;
+                }
+            }
+        }
 
-		return finalClusterSet;
-	}
+        if (cluster1 == null || cluster2 == null)
+            throw new InvalidClustersNumberException("Errore nella selezione dei cluster da fondere");
 
-	/**
-	 * Metodo toString
-	 * restituisce una stringa contenente gli indici degli esempi raggruppati nei cluster
-	 *
-	 * @return str stringa contenente gli indici degli esempi raggruppati nei cluster
-	 */
-	public String toString(){
-		StringBuilder str= new StringBuilder();
-		for(int i=0;i<C.length;i++){
-			if (C[i]!=null) str.append("cluster").append(i).append(":").append(C[i]).append("\n");
-		}
-		return str.toString();
+        Cluster mergedCluster = cluster1.mergeCluster(cluster2, minD);
+        ClusterSet finalClusterSet = new ClusterSet();
+        for (Cluster c : this) {
+            if (c != cluster1 && c != cluster2) {
+                finalClusterSet.add(c);
+            }
+        }
+        finalClusterSet.add(mergedCluster);
 
-	}
+        return finalClusterSet;
+    }
 
-	/**
-	 * Metodo toString
-	 * restituisce una stringa contenente gli esempi raggruppati nei cluster
-	 *
-	 * @param data oggetto di classe Data che modella il dataset su cui il clustering è calcolato
-	 * @return str stringa contenente gli esempi raggruppati nei cluster
-	 */
-	public String toString(Data data){
-		StringBuilder str= new StringBuilder();
-		for(int i=0;i<C.length;i++){
-			if (C[i]!=null) str.append("cluster").append(i).append(":").append(C[i].toString(data)).append("\n");
-		}
-		return str.toString();
+    /**
+     * Restituisce una rappresentazione testuale dell'insieme di cluster.
+     * La stringa mostra gli indici degli esempi raggruppati nei cluster.
+     *
+     * @return una stringa che rappresenta l'insieme di cluster.
+     */
+    @Override
+    public String toString() {
+        StringBuilder str = new StringBuilder();
+        int i = 0;
+        for (Cluster c : this) {
+            i++;
+            if (c != null) str.append("cluster").append(i).append(":").append(c).append("\n");
+        }
+        return str.toString();
+    }
 
-	}
+    /**
+     * Restituisce una rappresentazione testuale dell'insieme di cluster,
+     * visualizzando gli esempi raggruppati nei cluster, utilizzando un dataset.
+     *
+     * @param data oggetto di classe {@link ClusterableCollection} che rappresenta il dataset su cui il clustering è calcolato.
+     * @return una stringa che rappresenta gli esempi raggruppati nei cluster.
+     */
+    public String toString(ClusterableCollection<? extends ClusterableItem<?>> data) {
+        StringBuilder str = new StringBuilder();
+        int i = 0;
+        for (Cluster c : this) {
+            i++;
+            if (c != null) str.append("cluster").append(i).append(":").append(c.toString(data)).append("\n");
+        }
+        return str.toString();
+    }
 
+    /**
+     * Converte l'insieme di cluster in una stringa JSON utilizzando la libreria Gson.
+     * I cluster vengono serializzati con l'ausilio di {@link ClusterSetSerializer} e {@link ClusterSerializer}.
+     *
+     * @param layer l'insieme di cluster da serializzare.
+     * @param data la collezione di clusterabili su cui il clustering è stato calcolato.
+     * @return una stringa JSON che rappresenta l'insieme di cluster.
+     */
+    public static String toJson(ClusterSet layer, ClusterableCollection<? extends ClusterableItem<?>> data) {
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapter(ClusterSet.class, new ClusterSetSerializer(data))
+                .registerTypeAdapter(Cluster.class, new ClusterSerializer(data))
+                .create();
+        return gson.toJson(layer);
+    }
 }
