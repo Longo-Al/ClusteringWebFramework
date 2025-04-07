@@ -83,7 +83,13 @@ class ClientHandler extends Thread {
 
     private void handleDatasetLoading(){
         try {
-            Connection con = DbAccess.getConnection();
+            Connection con;
+            try {
+                con = DbAccess.getConnection();
+            } catch (DatabaseConnectionException e) {
+                con = DbAccess.getConnection("0.0.0.0");
+            }
+            
             askMacro("CLEAR");
             sendMessage(getLoadDisclaimer());
             dis.readUTF();
@@ -160,7 +166,12 @@ class ClientHandler extends Thread {
 
     private void handleClustering() {
         try {
-            Connection con = DbAccess.getConnection();
+            Connection con;
+            try {
+                con = DbAccess.getConnection();
+            } catch (DatabaseConnectionException e) {
+                con = DbAccess.getConnection("0.0.0.0");
+            }
             boolean exitClusteringMenu = false;
             while (!exitClusteringMenu) {
                 askMacro("CLEAR");
@@ -519,7 +530,8 @@ class ClientHandler extends Thread {
             "- È fondamentale rispettare il formato sopra indicato per evitare errori durante l'elaborazione.\n" +
             "- Ogni elemento dell'array deve contenere un solo oggetto chiave-valore.\n" +
             "- Il tipo di oggetto (es. \"example\") deve essere coerente all'interno di tutto il file.\n"+
-            "\n Premi invio per continuare.\n";
+            "\n Se si sta usando il programma per fini di debug è presente un jsontest.txt all'interno del progetto\n"+
+            "\nPremi invio per continuare.\n";
     }
 
     private void closeConnection() {
