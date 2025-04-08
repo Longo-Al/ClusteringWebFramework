@@ -5,11 +5,11 @@ Le principali cartelle di questo progetto sono:
 - **Client**  
   Contiene un main da chiamare per connettersi al server TCP del server.
 
-- **Server**  
-  Contiene tutti i moduli necessari per il clustering.
+- **Server** 
+  Contiene tutti i moduli necessari per il clustering, e un main che avvia un server tcp, alla quale connettersi con il client. 
 
 - **Servlet**  
-  Integra tutte le servlet utili per il frontend.
+  Integra tutte le servlet utili per il webfrontend.
 
 ## 🚀 Avvio del programma
 
